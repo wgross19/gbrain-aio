@@ -1,52 +1,124 @@
-# GBrain vanilla AIO — Unraid Compose Manager
-# One service. Custom image. Postgres is inside the container on 127.0.0.1.
-# Do not publish 5432. Do not give agents DATABASE_URL.
+# =============================================================================
+# gbrain-vanilla-aio — Compose reference for the Unraid DockerMan XML template
+# =============================================================================
+# This file is the RUNTIME reference. It is intentionally annotated so a
+# maintainer can translate every element into the Unraid "DockerMan" XML
+# template format (Community Applications <Template>). The XML lives in the
+# catalog repo; this Compose file stays the source of truth for behavior.
+#
+# DockerMan XML mapping cheat-sheet (what each block becomes):
+#   name:            -> <Name>gbrain-vanilla</Name>
+#   image:           -> <Repository>gbrain-vanilla-aio:v0.46.14.0</Repository>
+#   restart:         -> <RestartPolicy>unless-stopped</RestartPolicy>
+#   environment:     -> <Config Name="..." Target="..." Mode="..." Type="Variable"/>
+#   ports:           -> <Config Name="..." Target="3132" HostPort="..." Mode="host" Type="Port"/>
+#   volumes:         -> <Config Name="..." Target="..." HostPath="..." Mode="rw|ro" Type="Path"/>
+#   healthcheck:     -> <HealthCheck> (Unraid 6.12+)
+#   extra_hosts:     -> <ExtraHosts>host.docker.internal:host-gateway</ExtraHosts>
+#   security_opt:    -> <Privileged>false</Privileged> + <CapAdd>/<CapDrop>
+#
+# SECURITY INVARIANTS (do not relax in the XML):
+#   - Postgres listens on 127.0.0.1 INSIDE the container. NEVER publish 5432.
+#   - Agents/Hermes never receive DATABASE_URL. MCP is the only agent path.
+#   - The only published port is 3132 (HTTPS via Caddy).
+# =============================================================================
 
 name: gbrain-vanilla
 
 services:
   gbrain-vanilla:
+    # --- Build (Unraid: has_build=1, "Build" button in the template) ---------
+    # DockerMan XML does not express build args directly; the template ships a
+    # prebuilt image and the build is done by the App Factory pipeline. These
+    # args pin the exact upstream source so a rebuild is reproducible.
     build:
       context: .
       dockerfile: Dockerfile
       args:
+        # Pin the official garrytan/gbrain commit. Bump to upgrade.
         GBRAIN_GIT_SHA: ${GBRAIN_GIT_SHA:-864dec4f199f420dba1ea6c5bc72e824e09de978}
         BUN_IMAGE: ${BUN_IMAGE:-oven/bun:1.3.10}
+
+    # --- Image (Unraid: <Repository>) ----------------------------------------
+    # The prebuilt image the template installs. Overridable via .env.
     image: ${GBRAIN_VANILLA_IMAGE:-gbrain-vanilla-aio:v0.46.14.0}
+
+    # --- Restart policy (Unraid: <RestartPolicy>) ----------------------------
     restart: unless-stopped
+
+    # --- Environment (Unraid: <Config ... Type="Variable"/>) -----------------
+    # Each key maps to one XML <Config> row. "Target" is the in-container env
+    # var name; "Name" is the human label shown in the Unraid UI.
     environment:
+      # Postgres superuser. Keep "gbrain". (Variable)
       POSTGRES_USER: ${POSTGRES_USER:-gbrain}
+      # Postgres password. REQUIRED, alphanumeric only. (Variable, secret)
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Postgres database name. Keep "gbrain". (Variable)
       POSTGRES_DB: ${POSTGRES_DB:-gbrain}
+      # Postgres binds to loopback INSIDE the container. Do not expose. (Fixed)
       GBRAIN_DB_HOST: "127.0.0.1"
       GBRAIN_DB_PORT: "5432"
+      # GBrain HTTP listens on loopback inside the container. Caddy fronts it. (Fixed)
       GBRAIN_HTTP_PORT: "3131"
       GBRAIN_HTTP_BIND: "127.0.0.1"
+      # Public HTTPS origin clients use. Must match the published port. (Variable)
       GBRAIN_PUBLIC_URL: ${GBRAIN_PUBLIC_URL:-https://192.168.1.10:3132}
+      # Admin bootstrap token for first /admin login. Alphanumeric. (Variable, secret)
       GBRAIN_ADMIN_BOOTSTRAP_TOKEN: ${GBRAIN_ADMIN_BOOTSTRAP_TOKEN:-}
+      # LAN IP the container binds for the published HTTPS port. (Variable)
       GBRAIN_LAN_BIND: ${GBRAIN_LAN_BIND:-192.168.1.10}
+      # UID/GID for the brain repo bind mount (Unraid default 99:100). (Variable)
       BRAIN_UID: ${BRAIN_UID:-999}
       BRAIN_GID: ${BRAIN_GID:-100}
+      # Name of the mounted brain source. Must equal basename(BRAIN_PATH). (Variable)
       SOURCE_NAME: ${SOURCE_NAME:-cortext-test}
+      # Ollama openai-compat endpoint for embeddings + chat. (Variable)
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://192.168.1.10:11434/v1}
       OLLAMA_API_KEY: ${OLLAMA_API_KEY:-ollama}
+      # Together-compat key used to route chat/dream/think through Ollama /v1. (Variable)
       TOGETHER_API_KEY: ${TOGETHER_API_KEY:-ollama}
+
+    # --- Ports (Unraid: <Config ... Type="Port"/>) ---------------------------
+    # Only 3132 is published. Two rows: loopback-only + LAN bind.
+    #   Row 1: 127.0.0.1:3132 -> 3132  (host-local, optional)
+    #   Row 2: <LAN>:3132 -> 3132      (the one clients actually use)
+    # NEVER add a 5432 row.
     ports:
       - "127.0.0.1:${GBRAIN_HOST_PORT:-3132}:3132"
       - "${GBRAIN_LAN_BIND:-192.168.1.10}:${GBRAIN_HOST_PORT:-3132}:3132"
+
+    # --- Volumes (Unraid: <Config ... Type="Path"/>) --------------------------
+    # Each maps to one XML <Config> row. "Target" is the in-container path;
+    # "HostPath" is the Unraid share path the user picks.
     volumes:
+      # Postgres data. Persistent. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/data/postgres:/data/postgres
+      # GBrain home: config, OAuth secrets, runtime.env. Persistent. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/gbrain-home:/var/lib/gbrain
+      # Caddy certs + CA. Persistent so the phone trusts once. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/caddy:/config/caddy
+      # The brain markdown repo. Host share -> container /<SOURCE_NAME>. (Path, rw)
       - ${BRAIN_PATH:-/mnt/user/cortext-test}:/${SOURCE_NAME:-cortext-test}
+      # Caddy config is baked into the image; bind-mount read-only. (Path, ro)
       - ./rootfs/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+
+    # --- Healthcheck (Unraid: <HealthCheck>) ---------------------------------
+    # Probes the internal GBrain HTTP health endpoint. 120s start grace for
+    # first-boot Postgres init + migrations.
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3131/health"]
       interval: 15s
       timeout: 5s
       retries: 10
       start_period: 120s
+
+    # --- Extra hosts (Unraid: <ExtraHosts>) ----------------------------------
+    # Lets the container reach the host's Ollama via host.docker.internal.
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+    # --- Security (Unraid: <Privileged>false</Privileged>) ------------------
+    # no-new-privileges:true. Do NOT run privileged. No host Docker socket.
     security_opt:
       - no-new-privileges:true
