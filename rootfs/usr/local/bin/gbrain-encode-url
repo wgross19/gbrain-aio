@@ -1,0 +1,11 @@
+#!/usr/bin/env bun
+const user = encodeURIComponent(process.env.POSTGRES_USER || "gbrain");
+const pass = encodeURIComponent(process.env.POSTGRES_PASSWORD || "");
+const host = process.env.GBRAIN_DB_HOST || "127.0.0.1";
+const port = process.env.GBRAIN_DB_PORT || "5432";
+const db = encodeURIComponent(process.env.POSTGRES_DB || "gbrain");
+if (!pass) {
+  console.error("POSTGRES_PASSWORD is required");
+  process.exit(64);
+}
+process.stdout.write(`postgresql://${user}:${pass}@${host}:${port}/${db}`);
