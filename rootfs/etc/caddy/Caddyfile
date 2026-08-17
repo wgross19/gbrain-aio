@@ -1,0 +1,13 @@
+{
+	admin off
+	auto_https off
+	servers {
+		protocols h1 h2
+	}
+}
+
+:3132 {
+	tls /config/caddy/certs/cert.pem /config/caddy/certs/key.pem
+	redir /admin /admin/ 308
+	reverse_proxy 127.0.0.1:3131
+}

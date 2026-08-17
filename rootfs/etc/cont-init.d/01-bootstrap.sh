@@ -43,7 +43,7 @@ GBRAIN_DATABASE_URL=${ENCODED_URL}
 GBRAIN_HOME=/var/lib/gbrain
 GBRAIN_HTTP_PORT=${GBRAIN_HTTP_PORT:-3131}
 GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
-GBRAIN_PUBLIC_URL=${GBRAIN_PUBLIC_URL:-https://192.168.1.79:3132}
+GBRAIN_PUBLIC_URL=${GBRAIN_PUBLIC_URL:-https://192.168.1.10:3132}
 EOF
 chown gbrain:gbrain /var/lib/gbrain/runtime.env
 chmod 600 /var/lib/gbrain/runtime.env

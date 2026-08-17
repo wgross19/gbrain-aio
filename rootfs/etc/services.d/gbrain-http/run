@@ -47,5 +47,5 @@ log "starting gbrain serve on 127.0.0.1:3131"
 exec gosu gbrain /usr/local/bin/gbrain serve --http \
   --bind 127.0.0.1 \
   --port 3131 \
-  --public-url "${GBRAIN_PUBLIC_URL:-https://192.168.1.79:3132}" \
+  --public-url "${GBRAIN_PUBLIC_URL:-https://192.168.1.10:3132}" \
   --surface full

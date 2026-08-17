@@ -33,7 +33,7 @@ services:
       TOGETHER_API_KEY: ${TOGETHER_API_KEY:-ollama}
     ports:
       - "127.0.0.1:${GBRAIN_HOST_PORT:-3132}:3132"
-      - "${GBRAIN_LAN_BIND:-192.168.1.79}:${GBRAIN_HOST_PORT:-3132}:3132"
+      - "${GBRAIN_LAN_BIND:-192.168.1.10}:${GBRAIN_HOST_PORT:-3132}:3132"
     volumes:
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/data/postgres:/data/postgres
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/gbrain-home:/var/lib/gbrain

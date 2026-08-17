@@ -12,7 +12,7 @@ if [ -s "${CERT_DIR}/cert.pem" ] && [ -s "${CERT_DIR}/key.pem" ]; then
   exit 0
 fi
 
-SAN_IP="${GBRAIN_LAN_BIND:-192.168.1.79}"
+SAN_IP="${GBRAIN_LAN_BIND:-192.168.1.10}"
 log "minting self-signed TLS cert SAN IP:${SAN_IP} DNS:gbrain-vanilla.lan"
 openssl req -x509 -newkey rsa:2048 -sha256 -days 825 -nodes \
   -keyout "${CERT_DIR}/key.pem" \
