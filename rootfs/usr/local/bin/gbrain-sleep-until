@@ -1,0 +1,49 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Sleep until the next local clock match. Usage:
+#   gbrain-sleep-until HH:MM
+#   gbrain-sleep-until weekday HH:MM   (weekday = mon|tue|... or 1-7, 1=Mon)
+set -euo pipefail
+
+usage() {
+  printf 'usage: gbrain-sleep-until HH:MM | weekday HH:MM\n' >&2
+  exit 64
+}
+
+if [ "$#" -eq 1 ]; then
+  HHMM="$1"
+  now="$(date +%s)"
+  next="$(date -d "today ${HHMM}" +%s)"
+  if [ "${now}" -ge "${next}" ]; then
+    next="$(date -d "tomorrow ${HHMM}" +%s)"
+  fi
+elif [ "$#" -eq 2 ]; then
+  DAY="$1"
+  HHMM="$2"
+  case "${DAY}" in
+    mon|monday|1) DAY=monday ;;
+    tue|tuesday|2) DAY=tuesday ;;
+    wed|wednesday|3) DAY=wednesday ;;
+    thu|thursday|4) DAY=thursday ;;
+    fri|friday|5) DAY=friday ;;
+    sat|saturday|6) DAY=saturday ;;
+    sun|sunday|7) DAY=sunday ;;
+    *) usage ;;
+  esac
+  now="$(date +%s)"
+  today_name="$(date +%A | tr '[:upper:]' '[:lower:]')"
+  today_slot="$(date -d "today ${HHMM}" +%s)"
+  if [ "${today_name}" = "${DAY}" ] && [ "${now}" -lt "${today_slot}" ]; then
+    next="${today_slot}"
+  else
+    next="$(date -d "next ${DAY} ${HHMM}" +%s)"
+  fi
+else
+  usage
+fi
+
+delta=$((next - now))
+if [ "${delta}" -lt 1 ]; then
+  delta=1
+fi
+sleep "${delta}"

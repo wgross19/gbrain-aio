@@ -78,6 +78,17 @@ services:
       OLLAMA_API_KEY: ${OLLAMA_API_KEY:-ollama}
       # Together-compat key used to route chat/dream/think through Ollama /v1. (Variable)
       TOGETHER_API_KEY: ${TOGETHER_API_KEY:-ollama}
+      # Chat model name when OLLAMA_BASE_URL is set. (Variable)
+      CHAT_MODEL: ${CHAT_MODEL:-deepseek-v4-flash:cloud}
+      # Optional git push after a successful autopilot-cycle. Empty = off. (Variable)
+      BRAIN_GIT_PUSH_URL: ${BRAIN_GIT_PUSH_URL:-}
+      BRAIN_GIT_PUSH_TOKEN: ${BRAIN_GIT_PUSH_TOKEN:-}
+      # Optional weekly doctor remediate cap. Empty = exam only. (Variable)
+      DOCTOR_REMEDIATE_MAX_USD: ${DOCTOR_REMEDIATE_MAX_USD:-}
+      # Optional feature toggles. Empty = off. (Variable)
+      SKILLOPT_ENABLED: ${SKILLOPT_ENABLED:-}
+      NIGHTLY_QUALITY_PROBE: ${NIGHTLY_QUALITY_PROBE:-}
+      PARSER_PROBE_ENABLED: ${PARSER_PROBE_ENABLED:-}
 
     # --- Ports (Unraid: <Config ... Type="Port"/>) ---------------------------
     # Only 3132 is published. Two rows: loopback-only + LAN bind.

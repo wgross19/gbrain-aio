@@ -1,0 +1,69 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# After each successful autopilot-cycle, commit if dirty and push.
+# Empty BRAIN_GIT_PUSH_URL means off. Never force-push. Token stays out of remotes.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+
+if [ -z "${BRAIN_GIT_PUSH_URL:-}" ]; then
+  exit 0
+fi
+
+PATH_BRAIN="$(source_path)"
+STATE=/var/lib/gbrain/.gbrain/last-pushed-cycle-id
+DB="${POSTGRES_DB:-gbrain}"
+export PGPASSWORD="${POSTGRES_PASSWORD:-}"
+
+latest_cycle() {
+  gosu postgres psql -d "${DB}" -tAc \
+    "SELECT id FROM minion_jobs WHERE name = 'autopilot-cycle' AND status = 'completed' ORDER BY finished_at DESC NULLS LAST LIMIT 1" \
+    2>/dev/null | tr -d '[:space:]' || true
+}
+
+push_brain() {
+  if [ ! -d "${PATH_BRAIN}/.git" ]; then
+    log "git push skipped: ${PATH_BRAIN} is not a git repo"
+    return 0
+  fi
+  if ! gbrain_as git -C "${PATH_BRAIN}" remote get-url origin >/dev/null 2>&1; then
+    gbrain_as git -C "${PATH_BRAIN}" remote add origin "${BRAIN_GIT_PUSH_URL}"
+  else
+    gbrain_as git -C "${PATH_BRAIN}" remote set-url origin "${BRAIN_GIT_PUSH_URL}"
+  fi
+  if [ -n "$(gbrain_as git -C "${PATH_BRAIN}" status --porcelain)" ]; then
+    gbrain_as git -C "${PATH_BRAIN}" add -A
+    gbrain_as git -C "${PATH_BRAIN}" \
+      -c user.name=gbrain \
+      -c user.email=gbrain@localhost \
+      commit -m "gbrain autopilot-cycle"
+  fi
+  if [ -n "${BRAIN_GIT_PUSH_TOKEN:-}" ]; then
+    gbrain_as git -C "${PATH_BRAIN}" \
+      -c "http.extraHeader=Authorization: Bearer ${BRAIN_GIT_PUSH_TOKEN}" \
+      push origin HEAD
+  else
+    gbrain_as git -C "${PATH_BRAIN}" push origin HEAD
+  fi
+}
+
+while true; do
+  id="$(latest_cycle)"
+  last=""
+  if [ -f "${STATE}" ]; then
+    last="$(tr -d '[:space:]' < "${STATE}")"
+  fi
+  if [ -n "${id}" ] && [ "${id}" != "${last}" ]; then
+    log "successful autopilot-cycle ${id}; pushing mounted brain"
+    if push_brain; then
+      printf '%s\n' "${id}" > "${STATE}"
+      chown gbrain:users "${STATE}" || true
+    else
+      log "warn: git push failed; will retry after next successful cycle check"
+    fi
+  fi
+  sleep 60
+done

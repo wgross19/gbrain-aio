@@ -1,10 +1,8 @@
 # Spec — Self-sufficient gbrain-aio
 
-Status: **locked** (grill session 2026-08-18). Implementation is a separate step.
+Status: **implemented as PR** (2026-08-18). Open review: https://github.com/wgross19/gbrain-aio/pull/2 (`feat/self-sufficient-maintain`). Not merged. GHCR not published. Live gbrain-aio not restarted.
 
 Goal: a new Unraid user fills the template, clicks Apply, and the container starts healthy, indexes the mounted brain, and keeps itself fresh. No Hermes cron and no `docker exec` required for default maintenance.
-
-This spec does not change the running image until someone says implement.
 
 ## Product rules
 
@@ -193,4 +191,4 @@ A fresh container with only required Unraid fields:
 - Hermes session exporter
 - Collector sidecars
 - Multimodal reindex
-- Changing the published GHCR image until implement is approved
+- Changing the published GHCR image until this PR is merged and publish is approved

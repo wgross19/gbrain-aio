@@ -38,7 +38,12 @@ The admin dashboard and MCP share the HTTPS origin `https://<lan>:3132`.
 
 ## Maintenance
 
-- Nightly `gbrain dream`.
-- Daily `gbrain doctor`.
-- `gbrain sync && gbrain embed --stale`.
-- `self_upgrade.mode` should stay `notify`, never `auto`.
+In-container s6, not Hermes cron:
+
+- Autopilot every 30 minutes: `gbrain autopilot --repo /${SOURCE_NAME} --interval 1800 --no-worker`
+- Nightly 02:00: `gbrain dream --dir /${SOURCE_NAME}` (waits if a cycle holds the lock)
+- Weekly Monday 06:00: `gbrain doctor --json` → `~/.gbrain/last-doctor.json`
+- Optional `DOCTOR_REMEDIATE_MAX_USD` runs `gbrain doctor --remediate --max-usd N` for that run only
+- Optional `BRAIN_GIT_PUSH_URL` pushes the mounted brain after a successful `autopilot-cycle` (no force-push). Do not point a test copy at a live canonical remote.
+
+`self_upgrade.mode` should stay `notify`, never `auto`.

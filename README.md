@@ -6,12 +6,14 @@ One Unraid Compose service. One custom image. s6 runs:
 2. `gbrain serve --http` on `127.0.0.1:3131`
 3. Caddy TLS on published `3132`
 4. `gbrain jobs supervisor --nice`
+5. `gbrain autopilot --interval 1800 --no-worker`
+6. Nightly dream (02:00) and weekly doctor (Monday 06:00)
 
 Pinned to official [garrytan/gbrain](https://github.com/garrytan/gbrain) `v0.46.14.0` (`864dec4f199f420dba1ea6c5bc72e824e09de978`).
 
 This is **not** the patched live GBrain image. Postgres has no host port. Agents never get `DATABASE_URL`.
 
-Locked self-maintain spec (not implemented until approved): [docs/self-sufficient-spec.md](docs/self-sufficient-spec.md).
+Self-maintain spec: [docs/self-sufficient-spec.md](docs/self-sufficient-spec.md).
 
 ## Requirements
 
@@ -39,21 +41,25 @@ curl -fsSk https://127.0.0.1:3132/health
 Admin: `https://<lan>:3132/admin/`  
 Trust `caddy/certs/ca.pem` once. Paste the bootstrap token. Do not put the token in a URL.
 
-## After first up (inside the container)
+## After first up
+
+The container does first-boot itself when `/var/lib/gbrain/.gbrain/config.json` is missing:
+
+- `gbrain init` with `ollama:embeddinggemma` @ 768d
+- `git init` + initial commit if the mounted brain is not a repo
+- `gbrain sources add` + `sources federate` for `SOURCE_NAME`
+- file-plane `sync.repo_path` and `gbrain schema use gbrain-everything`
+- model routing into `config.json` when `OLLAMA_BASE_URL` is set
+- a source-scoped `sync` job after `/health` is up
+
+No `docker exec` is required for that path.
+
+Optional inspect:
 
 ```bash
 docker compose --env-file .env exec -T gbrain-aio \
-  gosu gbrain env HOME=/var/lib/gbrain gbrain init --help
+  gosu gbrain env HOME=/var/lib/gbrain gbrain sources list --json
 ```
-
-Typical first-brain steps:
-
-- `gbrain init` with `--schema-pack gbrain-everything` (or `gbrain-base-v2`)
-- `gbrain sources add` for the mounted brain path
-- `gbrain schema use gbrain-everything` if you want all three lenses
-- `gbrain auth register-client` for OAuth MCP
-
-`gbrain config set schema_pack` is not a valid key on 0.46.14. Use `gbrain schema use`.
 
 ## What this image does not include
 
@@ -104,12 +110,16 @@ embeddings, `ALTER COLUMN ... TYPE vector(768)`, rebuild the HNSW index).
 
 ### First-boot auto-init
 
-On first boot (no `config.json` yet), the container auto-runs
-`gbrain init --embedding-model ollama:embeddinggemma --embedding-dimensions 768`
-and registers the mounted `SOURCE_NAME` source. If the source path is not a
-git repo, registration is skipped with a warning — run
-`git -C /<SOURCE_NAME> init && git -C /<SOURCE_NAME> add -A && git -C /<SOURCE_NAME> commit -m "initial import"`
-first, then re-run `gbrain sources add <SOURCE_NAME> --path /<SOURCE_NAME>`.
+On first boot (no `config.json` yet), the container:
+
+1. Runs `gbrain init` with `ollama:embeddinggemma` @ 768d
+2. `git init` + initial commit if `/${SOURCE_NAME}` is not a repo
+3. Registers and federates `SOURCE_NAME`
+4. Writes file-plane `sync.repo_path` and runs `gbrain schema use gbrain-everything`
+5. Writes model routing when `OLLAMA_BASE_URL` is set
+6. Enqueues a source-scoped sync after serve is up
+
+If `config.json` already exists, init is skipped. A missing source is re-registered.
 
 ## Layout
 
@@ -118,7 +128,8 @@ Dockerfile
 compose.yaml
 .env.example
 rootfs/etc/cont-init.d/     bootstrap, postgres, caddy TLS
-rootfs/etc/services.d/      postgres, gbrain-http, caddy, gbrain-worker
+rootfs/etc/services.d/      postgres, gbrain-http, caddy, gbrain-worker, gbrain-autopilot, gbrain-dream, gbrain-doctor
+rootfs/usr/local/bin/       first-boot, enqueue, dream, doctor, git push
 rootfs/etc/caddy/Caddyfile
 ```
 

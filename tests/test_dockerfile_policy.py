@@ -63,6 +63,10 @@ def _worker() -> str:
     return (REPO_ROOT / "rootfs/etc/services.d/gbrain-worker/run").read_text()
 
 
+def _autopilot() -> str:
+    return (REPO_ROOT / "rootfs/etc/services.d/gbrain-autopilot/run").read_text()
+
+
 # --- Security invariants (static, no Docker needed) ---------------------------
 
 def test_postgres_5432_is_never_published() -> None:
@@ -108,6 +112,13 @@ def test_worker_is_supervised_and_waits_for_postgres() -> None:
     worker = _worker()
     assert "gbrain jobs supervisor" in worker  # nosec B101
     assert "pg_isready" in worker  # nosec B101
+
+
+def test_autopilot_service_waits_for_postgres_and_uses_no_worker() -> None:
+    auto = _autopilot()
+    assert "wait_postgres" in auto  # nosec B101
+    assert "--no-worker" in auto  # nosec B101
+    assert "--interval 1800" in auto  # nosec B101
 
 
 def test_dockerfile_pins_upstream_sha() -> None:

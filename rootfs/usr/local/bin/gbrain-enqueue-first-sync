@@ -1,0 +1,36 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# After serve is up, enqueue one source-scoped sync. Does not block HTTP.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+
+MARKER=/var/lib/gbrain/.gbrain/need-first-sync
+DONE=/var/lib/gbrain/.gbrain/first-sync.enqueued
+if [ ! -f "${MARKER}" ]; then
+  exit 0
+fi
+
+NAME="$(source_name)"
+for _ in $(seq 1 90); do
+  if curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+if ! curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+  log "serve not healthy; skip first sync enqueue"
+  exit 0
+fi
+
+PARAMS="$(printf '{"sourceId":"%s"}' "${NAME}")"
+log "enqueue source-scoped sync for ${NAME}"
+gbrain_as gbrain jobs submit sync \
+  --params "${PARAMS}" \
+  --idempotency-key "first-boot-sync:${NAME}" || log "warn: sync enqueue failed"
+rm -f "${MARKER}"
+touch "${DONE}"
+chown gbrain:users "${DONE}" || true

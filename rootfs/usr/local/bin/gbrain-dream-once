@@ -1,0 +1,32 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Nightly dream. Wait if an autopilot-cycle holds the lock.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+PATH_BRAIN="$(source_path)"
+
+locked() {
+  printf '%s' "${1:-}" | grep -Eq 'cycle_already_running|already running\. \(locked\)'
+}
+
+tries=0
+while [ "${tries}" -lt 60 ]; do
+  set +e
+  out="$(gbrain_as gbrain dream --dir "${PATH_BRAIN}" 2>&1)"
+  rc=$?
+  set -e
+  printf '%s\n' "${out}"
+  if locked "${out}"; then
+    tries=$((tries + 1))
+    log "dream waiting on cycle lock (${tries})"
+    sleep 30
+    continue
+  fi
+  exit "${rc}"
+done
+log "dream gave up waiting on cycle lock"
+exit 1

@@ -36,6 +36,11 @@ ENCODED_URL="$(
   /usr/local/bin/gbrain-encode-url
 )"
 
+TOGETHER_KEY="${TOGETHER_API_KEY:-}"
+if [ -n "${OLLAMA_BASE_URL:-}" ] && [ -z "${TOGETHER_KEY}" ]; then
+  TOGETHER_KEY=ollama
+fi
+
 umask 077
 cat > /var/lib/gbrain/runtime.env <<EOF
 DATABASE_URL=${ENCODED_URL}
@@ -44,6 +49,8 @@ GBRAIN_HOME=/var/lib/gbrain
 GBRAIN_HTTP_PORT=${GBRAIN_HTTP_PORT:-3131}
 GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
 GBRAIN_PUBLIC_URL=${GBRAIN_PUBLIC_URL:-https://192.168.1.10:3132}
+CHAT_MODEL=${CHAT_MODEL:-deepseek-v4-flash:cloud}
+TOGETHER_API_KEY=${TOGETHER_KEY}
 EOF
 chown gbrain:users /var/lib/gbrain/runtime.env
 chmod 600 /var/lib/gbrain/runtime.env

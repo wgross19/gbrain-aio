@@ -1,0 +1,135 @@
+#!/usr/bin/env bun
+/**
+ * Merge self-sufficient defaults into file-plane config.json.
+ * File-plane is canonical. Prints dotted DB-plane keys to stdout as JSON
+ * so the caller can mirror them into the config table getConfig() reads.
+ */
+import { readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync } from "fs";
+import { dirname } from "path";
+
+function isOn(value: string | undefined): boolean {
+  return ["1", "true", "yes", "on"].includes((value ?? "").trim().toLowerCase());
+}
+
+function normalizeOllamaV1(raw: string): string {
+  const base = raw.replace(/\/+$/, "");
+  if (!base) return "";
+  return base.endsWith("/v1") ? base : `${base}/v1`;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+const configPath = process.env.CONFIG_PATH || "/var/lib/gbrain/.gbrain/config.json";
+const sourcePath = process.env.SOURCE_PATH || "";
+const ollamaBase = (process.env.OLLAMA_BASE_URL || "").trim();
+const chatModelName = (process.env.CHAT_MODEL || "deepseek-v4-flash:cloud").trim();
+const applyChatGated = isOn(process.env.APPLY_CHAT_GATED) || ollamaBase.length > 0;
+
+let cfg: Record<string, unknown> = {};
+if (existsSync(configPath)) {
+  cfg = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
+}
+
+cfg.embedding_model = "ollama:embeddinggemma";
+cfg.embedding_dimensions = 768;
+
+if (sourcePath) {
+  const sync = asRecord(cfg.sync);
+  sync.repo_path = sourcePath;
+  cfg.sync = sync;
+}
+
+cfg.schema_pack = "gbrain-everything";
+
+const mcp = asRecord(cfg.mcp);
+mcp.publish_skills = true;
+mcp.publish_advisor = true;
+cfg.mcp = mcp;
+
+const dbFlags: Record<string, string> = {
+  "mcp.publish_skills": "true",
+  "mcp.publish_advisor": "true",
+};
+
+if (sourcePath) {
+  dbFlags["sync.repo_path"] = sourcePath;
+}
+
+if (ollamaBase) {
+  const togetherUrl = normalizeOllamaV1(ollamaBase);
+  cfg.chat_model = `together:${chatModelName}`;
+  cfg.expansion_model = `together:${chatModelName}`;
+  const bases = asRecord(cfg.provider_base_urls);
+  bases.together = togetherUrl;
+  cfg.provider_base_urls = bases;
+}
+
+const autopilot = asRecord(cfg.autopilot);
+if (isOn(process.env.NIGHTLY_QUALITY_PROBE)) {
+  const probe = asRecord(autopilot.nightly_quality_probe);
+  probe.enabled = true;
+  autopilot.nightly_quality_probe = probe;
+}
+if (isOn(process.env.PARSER_PROBE_ENABLED)) {
+  const probe = asRecord(autopilot.conversation_parser_probe);
+  probe.enabled = true;
+  autopilot.conversation_parser_probe = probe;
+}
+if (Object.keys(autopilot).length > 0) {
+  cfg.autopilot = autopilot;
+}
+
+if (applyChatGated) {
+  const dream = asRecord(cfg.dream);
+  const drift = asRecord(dream.drift);
+  drift.enabled = true;
+  dream.drift = drift;
+  cfg.dream = dream;
+
+  const cycle = asRecord(cfg.cycle);
+  const enrich = asRecord(cycle.enrich_thin);
+  enrich.enabled = true;
+  cycle.enrich_thin = enrich;
+  const facts = asRecord(cycle.conversation_facts_backfill);
+  facts.enabled = true;
+  cycle.conversation_facts_backfill = facts;
+  const grade = asRecord(cycle.grade_takes);
+  const autoResolve = asRecord(grade.auto_resolve);
+  autoResolve.enabled = true;
+  grade.auto_resolve = autoResolve;
+  cycle.grade_takes = grade;
+  cfg.cycle = cycle;
+
+  const parser = asRecord(cfg.conversation_parser);
+  parser.llm_fallback_enabled = true;
+  cfg.conversation_parser = parser;
+
+  dbFlags["dream.drift.enabled"] = "true";
+  dbFlags["cycle.enrich_thin.enabled"] = "true";
+  dbFlags["cycle.conversation_facts_backfill.enabled"] = "true";
+  dbFlags["cycle.grade_takes.auto_resolve.enabled"] = "true";
+  dbFlags["conversation_parser.llm_fallback_enabled"] = "true";
+}
+
+if (isOn(process.env.SKILLOPT_ENABLED)) {
+  const cycle = asRecord(cfg.cycle);
+  const skillopt = asRecord(cycle.skillopt);
+  skillopt.enabled = true;
+  cycle.skillopt = skillopt;
+  cfg.cycle = cycle;
+  dbFlags["cycle.skillopt.enabled"] = "true";
+}
+
+mkdirSync(dirname(configPath), { recursive: true });
+writeFileSync(configPath, JSON.stringify(cfg, null, 2) + "\n", { mode: 0o600 });
+try {
+  chmodSync(configPath, 0o600);
+} catch {
+  /* best-effort */
+}
+
+process.stdout.write(JSON.stringify(dbFlags) + "\n");

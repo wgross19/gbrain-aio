@@ -1,0 +1,39 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Weekly doctor exam. Remediate only when DOCTOR_REMEDIATE_MAX_USD is a number.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+
+OUT=/var/lib/gbrain/.gbrain/last-doctor.json
+install -d -m 0755 /var/lib/gbrain/.gbrain
+
+set +e
+gbrain_as gbrain doctor --json >"${OUT}.tmp"
+set -e
+if [ -s "${OUT}.tmp" ]; then
+  mv "${OUT}.tmp" "${OUT}"
+  chown gbrain:users "${OUT}" || true
+  chmod 600 "${OUT}" || true
+else
+  rm -f "${OUT}.tmp"
+fi
+
+CAP="${DOCTOR_REMEDIATE_MAX_USD:-}"
+if [ -z "${CAP}" ]; then
+  log "doctor exam only (no remediate cap)"
+  exit 0
+fi
+case "${CAP}" in
+  ''|*[!0-9.]*|.|*.*.*)
+    log "DOCTOR_REMEDIATE_MAX_USD is not a number; exam only"
+    exit 0
+    ;;
+esac
+
+log "doctor remediate --max-usd ${CAP}"
+gbrain_as gbrain doctor --remediate --max-usd "${CAP}" || log "warn: doctor remediate failed"
+exit 0
