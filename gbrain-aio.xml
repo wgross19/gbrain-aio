@@ -7,8 +7,8 @@
   <MyIP/>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/wgross19/gbrain-vanilla-aio/issues</Support>
-  <Project>https://github.com/wgross19/gbrain-vanilla-aio</Project>
+  <Support>https://github.com/wgross19/gbrain-aio/issues</Support>
+  <Project>https://github.com/wgross19/gbrain-aio</Project>
   <Overview>Vanilla GBrain all-in-one for Unraid. One s6 container runs PostgreSQL 17 + pgvector, the official GBrain HTTP server, a Caddy TLS reverse proxy, and the GBrain job supervisor. Postgres listens on loopback only and is never published. Agents connect only through the MCP endpoint, never to Postgres.
 
 First run:

@@ -1,4 +1,4 @@
-# gbrain-vanilla-aio
+# gbrain-aio
 
 One Unraid Compose service. One custom image. s6 runs:
 

@@ -1,6 +1,6 @@
 # Tests
 
-Lifecycle and policy tests for the gbrain-vanilla-aio image.
+Lifecycle and policy tests for the gbrain-aio image.
 
 ## Layout
 
@@ -37,7 +37,7 @@ AIO_PYTEST_USE_PREBUILT_IMAGE=true python -m pytest tests/integration -m integra
 
 ## Notes
 
-- Integration tests build the image as `gbrain-vanilla-aio:pytest` unless
+- Integration tests build the image as `gbrain-aio:pytest` unless
   `AIO_PYTEST_USE_PREBUILT_IMAGE=true` is set.
 - The tests use ephemeral Docker volumes and remove the container + volumes
   after each run. Nothing persists.

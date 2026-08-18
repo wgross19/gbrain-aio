@@ -1,5 +1,5 @@
 # =============================================================================
-# gbrain-vanilla-aio — Compose reference for the Unraid DockerMan XML template
+# gbrain-aio — Compose reference for the Unraid DockerMan XML template
 # =============================================================================
 # This file is the RUNTIME reference. It is intentionally annotated so a
 # maintainer can translate every element into the Unraid "DockerMan" XML
@@ -8,7 +8,7 @@
 #
 # DockerMan XML mapping cheat-sheet (what each block becomes):
 #   name:            -> <Name>gbrain-vanilla</Name>
-#   image:           -> <Repository>gbrain-vanilla-aio:v0.46.14.0</Repository>
+#   image:           -> <Repository>gbrain-aio:v0.46.14.0</Repository>
 #   restart:         -> <RestartPolicy>unless-stopped</RestartPolicy>
 #   environment:     -> <Config Name="..." Target="..." Mode="..." Type="Variable"/>
 #   ports:           -> <Config Name="..." Target="3132" HostPort="..." Mode="host" Type="Port"/>
@@ -41,7 +41,7 @@ services:
 
     # --- Image (Unraid: <Repository>) ----------------------------------------
     # The prebuilt image the template installs. Overridable via .env.
-    image: ${GBRAIN_VANILLA_IMAGE:-gbrain-vanilla-aio:v0.46.14.0}
+    image: ${GBRAIN_VANILLA_IMAGE:-gbrain-aio:v0.46.14.0}
 
     # --- Restart policy (Unraid: <RestartPolicy>) ----------------------------
     restart: unless-stopped

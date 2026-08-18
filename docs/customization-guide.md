@@ -41,7 +41,7 @@ The central `aio-fleet` control plane publishes from `main` once the required re
 Before enabling it:
 
 - run `python3 -m venv .venv && . .venv/bin/activate && pip install -e "../aio-fleet[app-tests]"`
-- from `aio-fleet`, run `python -m aio_fleet validate-repo --repo gbrain-aio --repo-path ../gbrain-vanilla-aio`
+- from `aio-fleet`, run `python -m aio_fleet validate-repo --repo gbrain-aio --repo-path ../gbrain-aio`
 - run `pytest tests/integration -m integration`
 - set all required repository variables and secrets
 - confirm the XML, icon, and package names match the intended public repo

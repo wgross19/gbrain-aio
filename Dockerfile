@@ -13,10 +13,10 @@ ARG GBRAIN_REPO=https://github.com/garrytan/gbrain.git
 ARG S6_OVERLAY_VERSION=3.2.1.0
 ARG POSTGRES_MAJOR=17
 
-LABEL org.opencontainers.image.title="gbrain-vanilla-aio" \
+LABEL org.opencontainers.image.title="gbrain-aio" \
       org.opencontainers.image.source="${GBRAIN_REPO}" \
       org.opencontainers.image.revision="${GBRAIN_GIT_SHA}" \
-      com.gbrain-service.component="gbrain-vanilla-aio"
+      com.gbrain-service.component="gbrain-aio"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     GBRAIN_HOME=/var/lib/gbrain \

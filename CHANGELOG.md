@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-- Initial gbrain-vanilla-aio image and Compose files
+- Initial gbrain-aio image and Compose files
 - Include Caddy unit and generalize LAN defaults
 - Annotate compose.yaml and .env.example for DockerMan XML translation
 - Add lifecycle and policy test suite

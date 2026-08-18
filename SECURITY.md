@@ -6,7 +6,7 @@ This project wraps the official [garrytan/gbrain](https://github.com/garrytan/gb
 
 For issues specific to this Unraid AIO packaging, open a private vulnerability report on GitHub:
 
-https://github.com/wgross19/gbrain-vanilla-aio/security/advisories/new
+https://github.com/wgross19/gbrain-aio/security/advisories/new
 
 ## Security Invariants
 

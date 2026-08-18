@@ -15,7 +15,7 @@ from tests.conftest import REPO_ROOT
 
 # The image publishes HTTPS on 3132 (Caddy). Internal GBrain HTTP is 3131.
 # Postgres listens on 127.0.0.1:5432 inside the container and is never published.
-IMAGE_TAG = "gbrain-vanilla-aio:pytest"
+IMAGE_TAG = "gbrain-aio:pytest"
 INTERNAL_HEALTH = "http://127.0.0.1:3131/health"
 PUBLISHED_PORT = 3132
 

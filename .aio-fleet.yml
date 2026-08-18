@@ -1,6 +1,6 @@
 schema_version: 1
 repo: gbrain-aio
-github_repo: wgross19/gbrain-vanilla-aio
+github_repo: wgross19/gbrain-aio
 app_slug: gbrain-aio
 image:
   name: wgross19/gbrain-aio
