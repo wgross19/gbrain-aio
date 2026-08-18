@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.46.14.0-aio.2 - 2026-08-18
+
+### Documentation
+
+- Lock self-sufficient gbrain-aio maintain spec
+
+### Features
+
+- Auto-init brain on first boot + document config gotchas
+
+- Self-sufficient first-boot, autopilot, dream, and doctor (#2)
+
 ## v0.46.14.0-aio.1 - 2026-08-18
 
 ### Documentation

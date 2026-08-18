@@ -21,20 +21,9 @@ First run:
 Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat, or add a provider API key (Anthropic, OpenAI, Gemini, DeepSeek, Groq, Voyage) in the advanced fields. Leave optional URL, budget, and toggle fields empty to keep them off.</Overview>
   <Changes>### 2026-08-18&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Add AGENTS.md repository guidance&#xD;
-- Fix AGENTS.md security reference to centralized policy&#xD;
-- Pass aio-fleet validation&#xD;
-- Make Docker-backed integration tests pass against socket-proxy&#xD;
-- Add App Factory contract files&#xD;
-- Align app manifest with fleet contract&#xD;
-- Align repo name to gbrain-aio&#xD;
-- Rename runtime identifiers to gbrain-aio&#xD;
-- Sync .aio-fleet.yml with fleet integration timeout&#xD;
-- Expose UPSTREAM_VERSION ARG for fleet release tagging&#xD;
-- Initial gbrain-vanilla-aio image and Compose files&#xD;
-- Include Caddy unit and generalize LAN defaults&#xD;
-- Annotate compose.yaml and .env.example for DockerMan XML translation&#xD;
-- Add lifecycle and policy test suite</Changes>
+- Lock self-sufficient gbrain-aio maintain spec&#xD;
+- Auto-init brain on first boot + document config gotchas&#xD;
+- Self-sufficient first-boot, autopilot, dream, and doctor (#2)</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
