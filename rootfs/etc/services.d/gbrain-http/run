@@ -43,8 +43,8 @@ SQL
 
 gosu postgres psql -v ON_ERROR_STOP=1 -d "${PGDB_NAME}" -c 'CREATE EXTENSION IF NOT EXISTS vector;'
 
-# First-boot init, then serve. Do not block HTTP on indexing.
-/usr/local/bin/gbrain-first-boot
+# First-boot init, then serve. Do not block HTTP on indexing or a failed init.
+/usr/local/bin/gbrain-first-boot || log "warn: first-boot failed; starting serve"
 /usr/local/bin/gbrain-enqueue-first-sync &
 
 log "starting gbrain serve on 127.0.0.1:3131"

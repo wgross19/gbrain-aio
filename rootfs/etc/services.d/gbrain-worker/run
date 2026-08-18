@@ -2,18 +2,14 @@
 # shellcheck shell=bash
 set -euo pipefail
 
-if [ -f /var/lib/gbrain/runtime.env ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . /var/lib/gbrain/runtime.env
-  set +a
-fi
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
 
-for _ in $(seq 1 60); do
-  if pg_isready -h 127.0.0.1 -p 5432 >/dev/null 2>&1; then
-    break
-  fi
-  sleep 1
-done
+load_runtime
+wait_postgres
+# Wait for first-boot config.json so this supervisor cannot create a
+# default 1280-d schema before init writes embeddinggemma 768.
+wait_config
 
-exec gosu gbrain /usr/local/bin/gbrain jobs supervisor --nice 10
+exec gosu gbrain env HOME=/var/lib/gbrain \
+  /usr/local/bin/gbrain jobs supervisor --nice 10
