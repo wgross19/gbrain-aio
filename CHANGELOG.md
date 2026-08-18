@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.46.14.0-aio.1 - 2026-08-18
+
+### Documentation
+
+- Add AGENTS.md repository guidance
+
+- Fix AGENTS.md security reference to centralized policy
+
+### Fixes
+
+- Pass aio-fleet validation
+
+- Make Docker-backed integration tests pass against socket-proxy
+
+### Maintenance
+
+- Add App Factory contract files
+
+- Align app manifest with fleet contract
+
+- Align repo name to gbrain-aio
+
+- Rename runtime identifiers to gbrain-aio
+
+- Sync .aio-fleet.yml with fleet integration timeout
+
+- Expose UPSTREAM_VERSION ARG for fleet release tagging
+
+### Other Changes
+
+- Initial gbrain-vanilla-aio image and Compose files
+
+- Include Caddy unit and generalize LAN defaults
+
+- Annotate compose.yaml and .env.example for DockerMan XML translation
+
+- Add lifecycle and policy test suite
+
 ## v0.1.0 - 2026-08-17
 
 ### Features
