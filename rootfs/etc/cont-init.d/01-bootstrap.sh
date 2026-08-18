@@ -5,7 +5,7 @@ set -euo pipefail
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
 install -d -m 0755 /var/lib/gbrain /data/postgres /run/postgresql /config/caddy/certs
-chown -R gbrain:gbrain /var/lib/gbrain
+chown -R gbrain:users /var/lib/gbrain
 chown -R postgres:postgres /data/postgres /run/postgresql
 
 SOURCE_NAME="${SOURCE_NAME:-cortext-test}"
@@ -45,6 +45,6 @@ GBRAIN_HTTP_PORT=${GBRAIN_HTTP_PORT:-3131}
 GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
 GBRAIN_PUBLIC_URL=${GBRAIN_PUBLIC_URL:-https://192.168.1.10:3132}
 EOF
-chown gbrain:gbrain /var/lib/gbrain/runtime.env
+chown gbrain:users /var/lib/gbrain/runtime.env
 chmod 600 /var/lib/gbrain/runtime.env
 log "runtime env written (password not logged)"

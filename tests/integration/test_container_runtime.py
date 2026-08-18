@@ -166,9 +166,9 @@ def test_mounted_brain_path_is_visible(runtime: DockerRuntime) -> None:
             c.wait_for_internal_health()
             # The brain mount is exposed at /test-brain (SOURCE_NAME=test-brain).
             assert c.path_exists("/test-brain")  # nosec B101
-            # Bootstrap chowns it to BRAIN_UID:BRAIN_GID (999:100).
+            # Bootstrap chowns it to BRAIN_UID:BRAIN_GID (99:100).
             result = c.exec("stat -c '%u:%g' /test-brain")
-            assert result.stdout.strip() == "999:100"  # nosec B101
+            assert result.stdout.strip() == "99:100"  # nosec B101
 
 
 # --- 11. Worker startup does not silently fail --------------------------------

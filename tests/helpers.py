@@ -131,7 +131,7 @@ def base_env() -> dict[str, str]:
         "GBRAIN_LAN_BIND": "127.0.0.1",
         "GBRAIN_PUBLIC_URL": "https://127.0.0.1:3132",
         "SOURCE_NAME": "test-brain",
-        "BRAIN_UID": "999",
+        "BRAIN_UID": "99",
         "BRAIN_GID": "100",
     }
 

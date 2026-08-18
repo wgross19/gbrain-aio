@@ -52,10 +52,9 @@ RUN apt-get update \
   && tar -C / -Jxpf /tmp/s6-noarch.tar.xz \
   && tar -C / -Jxpf /tmp/s6-arch.tar.xz \
   && rm -f /tmp/s6-noarch.tar.xz /tmp/s6-arch.tar.xz \
-  && groupadd --system --gid 999 gbrain \
-  && useradd --system --uid 999 --gid gbrain --home-dir /var/lib/gbrain --create-home gbrain \
+  && useradd --system --uid 99 --gid users --home-dir /var/lib/gbrain --create-home gbrain \
   && mkdir -p /opt/gbrain /var/lib/gbrain /data/postgres /run/postgresql /config/caddy/certs \
-  && chown -R gbrain:gbrain /opt/gbrain /var/lib/gbrain \
+  && chown -R gbrain:users /opt/gbrain /var/lib/gbrain \
   && chown -R postgres:postgres /data/postgres /run/postgresql \
   && rm -rf /var/lib/apt/lists/*
 
@@ -70,7 +69,7 @@ RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && cp -a /tmp/gbrain-src/. /opt/gbrain/ \
   && rm -rf /tmp/gbrain-src \
   && bun install --frozen-lockfile \
-  && chown -R gbrain:gbrain /opt/gbrain \
+  && chown -R gbrain:users /opt/gbrain \
   && printf '%s\n' '#!/bin/sh' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'exec bun run /opt/gbrain/src/cli.ts "$@"' > /usr/local/bin/gbrain \
   && chmod 755 /usr/local/bin/gbrain
 
