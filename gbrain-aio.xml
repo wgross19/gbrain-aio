@@ -20,8 +20,9 @@ First run:
 
 Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat.</Overview>
   <Changes>### 2026-08-17&#xD;
+- Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Initial gbrain-aio Community Applications template</Changes>
-  <Category>AI:</Category>
+  <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/icons/gbrain.png</Icon>

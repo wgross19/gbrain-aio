@@ -6,7 +6,7 @@ Use this when turning this repo into a real, publishable Unraid AIO app.
 
 1. Confirm `gbrain-aio.xml` matches the intended public repo, icon, and support URLs.
 2. Replace `assets/app-icon.png` with the real GBrain icon.
-3. Update `README.md`, `SECURITY.md`, and `.github/FUNDING.yml`.
+3. Update `README.md`. Shared `SECURITY.md` and `.github/FUNDING.yml` live in `aio-fleet`, not this repo.
 4. Confirm the upstream GBrain commit pin in `Dockerfile` is current.
 5. Confirm the integration tests assert the real readiness signal and health endpoint.
 6. Configure the repo in `aio-fleet/fleet.yml`, export `.aio-fleet.yml`, and pin the upstream version.
