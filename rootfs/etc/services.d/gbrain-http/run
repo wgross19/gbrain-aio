@@ -43,6 +43,25 @@ SQL
 
 gosu postgres psql -v ON_ERROR_STOP=1 -d "${PGDB_NAME}" -c 'CREATE EXTENSION IF NOT EXISTS vector;'
 
+# --- First-boot init + source registration --------------------------------
+# If no config exists yet, initialize the brain against the internal Postgres
+# and register the mounted source so a fresh install is ready without manual
+# `docker exec` steps. Idempotent: skips once config.json exists.
+if [ ! -f /var/lib/gbrain/.gbrain/config.json ]; then
+  log "first boot: initializing brain (embeddinggemma 768d)"
+  gosu gbrain env HOME=/var/lib/gbrain gbrain init \
+    --url "${DATABASE_URL}" \
+    --embedding-model ollama:embeddinggemma \
+    --embedding-dimensions 768 \
+    --non-interactive || log "warn: gbrain init failed (will retry next boot)"
+  if [ -d "/${SOURCE_NAME}" ]; then
+    log "first boot: registering source ${SOURCE_NAME}"
+    gosu gbrain env HOME=/var/lib/gbrain gbrain sources add "${SOURCE_NAME}" \
+      --path "/${SOURCE_NAME}" --name "${SOURCE_NAME}" \
+      --force 2>/dev/null || log "warn: source registration failed (may need git init)"
+  fi
+fi
+
 log "starting gbrain serve on 127.0.0.1:3131"
 exec gosu gbrain /usr/local/bin/gbrain serve --http \
   --bind 127.0.0.1 \

@@ -121,3 +121,18 @@ def test_dockerfile_uses_s6_overlay() -> None:
     dockerfile = _dockerfile()
     assert "s6-overlay" in dockerfile  # nosec B101
     assert 'ENTRYPOINT ["/init"]' in dockerfile  # nosec B101
+
+
+def test_dockerfile_runs_gbrain_as_unraid_99_100() -> None:
+    """gbrain must run as Unraid's nobody:users (99:100), not 999:999.
+
+    The brain bind mount is owned by 99:100 on Unraid. If gbrain runs as a
+    different uid/gid it cannot read 640-permission files in the brain,
+    causing EACCES during sync. This guards against regressing to 999.
+    """
+    dockerfile = _dockerfile()
+    assert "useradd --system --uid 99 --gid users" in dockerfile  # nosec B101
+    assert "999" not in dockerfile  # nosec B101
+    # chown targets must use the users group, not a gbrain group.
+    assert "gbrain:users" in dockerfile  # nosec B101
+    assert "gbrain:gbrain" not in dockerfile  # nosec B101

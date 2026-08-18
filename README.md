@@ -60,6 +60,55 @@ Typical first-brain steps:
 - No live-lab `/repos` code-sync patch
 - Official remote MCP will not honor `sources_add` `path` (security). Use host CLI for local paths, or MCP `url` for HTTPS git clones (markdown sync only)
 
+## Configuration & troubleshooting
+
+### Model routing (chat / expansion / embedding)
+
+The image defaults to `ollama:embeddinggemma` @768d for embeddings. Chat and
+expansion default to the upstream init models; to route all gbrain functions
+through a local Ollama via the "together hijack" (set `TOGETHER_API_KEY=ollama`
+and point the together provider at Ollama's OpenAI-compatible endpoint), edit
+`/var/lib/gbrain/.gbrain/config.json` inside the container:
+
+```json
+{
+  "chat_model": "together:deepseek-v4-flash:cloud",
+  "expansion_model": "together:deepseek-v4-flash:cloud",
+  "provider_base_urls": { "together": "http://<lan>:11434/v1" }
+}
+```
+
+Then restart the container. The `provider_base_urls.together` entry is what
+routes the "together" provider to Ollama — there is no `TOGETHER_BASE_URL`
+env var, so this must live in `config.json`.
+
+### `gbrain config set` writes to the DB plane, not the file
+
+`gbrain config set <key> <value>` reports success but writes to the Postgres
+DB plane, which is **shadowed at runtime** by the file plane
+(`/var/lib/gbrain/.gbrain/config.json`). To change a model or provider setting
+durably, edit `config.json` directly (as above) rather than relying on
+`config set`. The CLI prints `source: file/env plane ... a DB-plane value also
+exists and is shadowed at runtime` when this is happening.
+
+### Embedding dimension mismatch on re-init
+
+If the Postgres DB already has a `vector(1280)` embedding column (e.g. from a
+prior init with a different model) and you re-init with a 768d model, gbrain
+refuses with a destructive-migration warning. On a fresh test stack, wipe the
+Postgres data dir (`/mnt/user/appdata/gbrain-aio/data/postgres`) and restart.
+On a populated brain, follow the migration recipe gbrain prints (NULL the
+embeddings, `ALTER COLUMN ... TYPE vector(768)`, rebuild the HNSW index).
+
+### First-boot auto-init
+
+On first boot (no `config.json` yet), the container auto-runs
+`gbrain init --embedding-model ollama:embeddinggemma --embedding-dimensions 768`
+and registers the mounted `SOURCE_NAME` source. If the source path is not a
+git repo, registration is skipped with a warning — run
+`git -C /<SOURCE_NAME> init && git -C /<SOURCE_NAME> add -A && git -C /<SOURCE_NAME> commit -m "initial import"`
+first, then re-run `gbrain sources add <SOURCE_NAME> --path /<SOURCE_NAME>`.
+
 ## Layout
 
 ```
