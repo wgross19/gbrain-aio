@@ -11,6 +11,8 @@ Pinned to official [garrytan/gbrain](https://github.com/garrytan/gbrain) `v0.46.
 
 This is **not** the patched live GBrain image. Postgres has no host port. Agents never get `DATABASE_URL`.
 
+Locked self-maintain spec (not implemented until approved): [docs/self-sufficient-spec.md](docs/self-sufficient-spec.md).
+
 ## Requirements
 
 - Docker + Compose
