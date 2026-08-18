@@ -23,7 +23,7 @@ Use this template when opening a support thread for a gbrain-aio issue.
 **Container logs:**
 
 ```text
-(paste `docker logs gbrain-vanilla` output)
+(paste `docker logs gbrain-aio` output)
 ```
 
 **Relevant config (redact secrets):**

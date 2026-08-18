@@ -157,7 +157,7 @@ class DockerRuntime:
         brain_mount: str | None = None,
     ) -> Iterator["ContainerHandle"]:
         suffix = uuid.uuid4().hex[:10]
-        name = f"gbrain-vanilla-pytest-{suffix}"
+        name = f"gbrain-aio-pytest-{suffix}"
         http_port = reserve_host_port()
         data_volume = create_docker_volume(f"{name}-data")
         home_volume = create_docker_volume(f"{name}-home")

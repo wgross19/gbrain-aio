@@ -12,7 +12,7 @@ The container routes embeddings and openai-compat chat through `OLLAMA_BASE_URL`
 To change the model, set the model pins inside the container after first boot:
 
 ```bash
-docker compose --env-file .env exec -T gbrain-vanilla gosu gbrain env HOME=/var/lib/gbrain gbrain models set ...
+docker compose --env-file .env exec -T gbrain-aio gosu gbrain env HOME=/var/lib/gbrain gbrain models set ...
 ```
 
 ## OAuth and MCP

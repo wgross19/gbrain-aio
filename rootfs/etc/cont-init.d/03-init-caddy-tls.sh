@@ -13,12 +13,12 @@ if [ -s "${CERT_DIR}/cert.pem" ] && [ -s "${CERT_DIR}/key.pem" ]; then
 fi
 
 SAN_IP="${GBRAIN_LAN_BIND:-192.168.1.10}"
-log "minting self-signed TLS cert SAN IP:${SAN_IP} DNS:gbrain-vanilla.lan"
+log "minting self-signed TLS cert SAN IP:${SAN_IP} DNS:gbrain-aio.lan"
 openssl req -x509 -newkey rsa:2048 -sha256 -days 825 -nodes \
   -keyout "${CERT_DIR}/key.pem" \
   -out "${CERT_DIR}/cert.pem" \
-  -subj "/CN=gbrain-vanilla.lan" \
-  -addext "subjectAltName=IP:${SAN_IP},IP:127.0.0.1,DNS:gbrain-vanilla.lan,DNS:localhost"
+  -subj "/CN=gbrain-aio.lan" \
+  -addext "subjectAltName=IP:${SAN_IP},IP:127.0.0.1,DNS:gbrain-aio.lan,DNS:localhost"
 
 # Self-signed: the cert is also the CA P4 can copy into Hermes.
 cp -a "${CERT_DIR}/cert.pem" "${CERT_DIR}/ca.pem"

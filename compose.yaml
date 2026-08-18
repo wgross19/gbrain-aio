@@ -7,7 +7,7 @@
 # catalog repo; this Compose file stays the source of truth for behavior.
 #
 # DockerMan XML mapping cheat-sheet (what each block becomes):
-#   name:            -> <Name>gbrain-vanilla</Name>
+#   name:            -> <Name>gbrain-aio</Name>
 #   image:           -> <Repository>gbrain-aio:v0.46.14.0</Repository>
 #   restart:         -> <RestartPolicy>unless-stopped</RestartPolicy>
 #   environment:     -> <Config Name="..." Target="..." Mode="..." Type="Variable"/>
@@ -23,10 +23,10 @@
 #   - The only published port is 3132 (HTTPS via Caddy).
 # =============================================================================
 
-name: gbrain-vanilla
+name: gbrain-aio
 
 services:
-  gbrain-vanilla:
+  gbrain-aio:
     # --- Build (Unraid: has_build=1, "Build" button in the template) ---------
     # DockerMan XML does not express build args directly; the template ships a
     # prebuilt image and the build is done by the App Factory pipeline. These
@@ -41,7 +41,7 @@ services:
 
     # --- Image (Unraid: <Repository>) ----------------------------------------
     # The prebuilt image the template installs. Overridable via .env.
-    image: ${GBRAIN_VANILLA_IMAGE:-gbrain-aio:v0.46.14.0}
+    image: ${GBRAIN_AIO_IMAGE:-gbrain-aio:v0.46.14.0}
 
     # --- Restart policy (Unraid: <RestartPolicy>) ----------------------------
     restart: unless-stopped
@@ -93,11 +93,11 @@ services:
     # "HostPath" is the Unraid share path the user picks.
     volumes:
       # Postgres data. Persistent. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/data/postgres:/data/postgres
+      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/data/postgres:/data/postgres
       # GBrain home: config, OAuth secrets, runtime.env. Persistent. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/gbrain-home:/var/lib/gbrain
+      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/gbrain-home:/var/lib/gbrain
       # Caddy certs + CA. Persistent so the phone trusts once. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-vanilla}/caddy:/config/caddy
+      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/caddy:/config/caddy
       # The brain markdown repo. Host share -> container /<SOURCE_NAME>. (Path, rw)
       - ${BRAIN_PATH:-/mnt/user/cortext-test}:/${SOURCE_NAME:-cortext-test}
       # Caddy config is baked into the image; bind-mount read-only. (Path, ro)

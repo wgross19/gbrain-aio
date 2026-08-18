@@ -32,7 +32,7 @@ docker compose --env-file .env ps
 curl -fsSk https://127.0.0.1:3132/health
 ```
 
-`docker compose --env-file .env port gbrain-vanilla 5432` must fail.
+`docker compose --env-file .env port gbrain-aio 5432` must fail.
 
 Admin: `https://<lan>:3132/admin/`  
 Trust `caddy/certs/ca.pem` once. Paste the bootstrap token. Do not put the token in a URL.
@@ -40,7 +40,7 @@ Trust `caddy/certs/ca.pem` once. Paste the bootstrap token. Do not put the token
 ## After first up (inside the container)
 
 ```bash
-docker compose --env-file .env exec -T gbrain-vanilla \
+docker compose --env-file .env exec -T gbrain-aio \
   gosu gbrain env HOME=/var/lib/gbrain gbrain init --help
 ```
 
