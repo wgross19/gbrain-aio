@@ -10,6 +10,7 @@ image:
 release:
   name: GBrain AIO
   profile: changelog-version
+  previous_tag_command: latest-aio-tag
 upstream:
   name: GBrain
   version_key: UPSTREAM_VERSION
@@ -23,6 +24,8 @@ catalog:
   assets:
     - source: gbrain-aio.xml
       target: gbrain-aio.xml
+    - source: assets/app-icon.png
+      target: icons/gbrain.png
 tests:
   unit: tests/test_dockerfile_policy.py
   integration: tests/integration -m integration
