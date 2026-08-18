@@ -12,6 +12,10 @@ ARG GBRAIN_GIT_SHA=864dec4f199f420dba1ea6c5bc72e824e09de978
 ARG GBRAIN_REPO=https://github.com/garrytan/gbrain.git
 ARG S6_OVERLAY_VERSION=3.2.1.0
 ARG POSTGRES_MAJOR=17
+# Upstream GBrain release version. The fleet reads this ARG (via
+# version_key: UPSTREAM_VERSION) to compute the release tag. The build stays
+# pinned to GBRAIN_GIT_SHA; this is the discoverable release label only.
+ARG UPSTREAM_VERSION=v0.46.14.0
 
 LABEL org.opencontainers.image.title="gbrain-aio" \
       org.opencontainers.image.source="${GBRAIN_REPO}" \
