@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>gbrain-aio</Name>
+  <Repository>wgross19/gbrain-aio:latest</Repository>
+  <Registry>https://hub.docker.com/r/wgross19/gbrain-aio</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/wgross19/gbrain-vanilla-aio/issues</Support>
+  <Project>https://github.com/wgross19/gbrain-vanilla-aio</Project>
+  <Overview>Vanilla GBrain all-in-one for Unraid. One s6 container runs PostgreSQL 17 + pgvector, the official GBrain HTTP server, a Caddy TLS reverse proxy, and the GBrain job supervisor. Postgres listens on loopback only and is never published. Agents connect only through the MCP endpoint, never to Postgres.
+
+First run:
+1. Set POSTGRES_PASSWORD and GBRAIN_ADMIN_BOOTSTRAP_TOKEN to alphanumeric values.
+2. Set GBRAIN_LAN_BIND and GBRAIN_PUBLIC_URL to your LAN HTTPS origin.
+3. Create an empty brain directory matching BRAIN_PATH / SOURCE_NAME.
+4. Start the container, then open https://&lt;lan&gt;:3132/admin/ and paste the bootstrap token.
+5. Trust the generated CA once (caddy/certs/ca.pem) on any phone or WebView.
+
+Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat.</Overview>
+  <Changes>### 2026-08-17&#xD;
+- Initial gbrain-aio Community Applications template</Changes>
+  <Category>AI:</Category>
+  <WebUI>https://[IP]:[PORT:3132]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/icons/gbrain.png</Icon>
+  <ExtraSearchTerms>gbrain brain knowledge graph AI agent memory</ExtraSearchTerms>
+  <Requires>Docker with Compose. A LAN IP you control. Optional: a local Ollama at http://&lt;lan&gt;:11434 for embeddings and chat.</Requires>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText>Support wgross19 on GitHub Sponsors.</DonateText>
+  <DonateLink>https://github.com/sponsors/wgross19</DonateLink>
+  <Description/>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>3132</HostPort>
+        <ContainerPort>3132</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/gbrain-aio/data/postgres</HostDir>
+      <ContainerDir>/data/postgres</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/gbrain-aio/gbrain-home</HostDir>
+      <ContainerDir>/var/lib/gbrain</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/gbrain-aio/caddy</HostDir>
+      <ContainerDir>/config/caddy</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/my-brain</HostDir>
+      <ContainerDir>/my-brain</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment/>
+
+  <Config Name="Web UI Port" Target="3132" Default="3132" Mode="tcp" Description="Published HTTPS port (Caddy)." Type="Port" Display="always" Required="true" Mask="false">3132</Config>
+  <Config Name="Postgres Data" Target="/data/postgres" Default="/mnt/user/appdata/gbrain-aio/data/postgres" Mode="rw" Description="Persistent PostgreSQL data." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/data/postgres</Config>
+  <Config Name="GBrain Home" Target="/var/lib/gbrain" Default="/mnt/user/appdata/gbrain-aio/gbrain-home" Mode="rw" Description="GBrain config, OAuth secrets, runtime.env." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/gbrain-home</Config>
+  <Config Name="Caddy Certs" Target="/config/caddy" Default="/mnt/user/appdata/gbrain-aio/caddy" Mode="rw" Description="Persistent TLS certs and CA." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/caddy</Config>
+  <Config Name="Brain Path" Target="/my-brain" Default="/mnt/user/my-brain" Mode="rw" Description="Host path to the brain markdown repo. Must be a git repo." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/my-brain</Config>
+  <Config Name="Postgres User" Target="POSTGRES_USER" Default="gbrain" Mode="" Description="Postgres superuser. Keep gbrain." Type="Variable" Display="advanced" Required="false" Mask="false">gbrain</Config>
+  <Config Name="Postgres Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="REQUIRED. Alphanumeric only. Secret." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Postgres DB" Target="POSTGRES_DB" Default="gbrain" Mode="" Description="Postgres database name. Keep gbrain." Type="Variable" Display="advanced" Required="false" Mask="false">gbrain</Config>
+  <Config Name="LAN Bind" Target="GBRAIN_LAN_BIND" Default="192.168.1.10" Mode="" Description="LAN IP the container binds for HTTPS." Type="Variable" Display="always" Required="true" Mask="false">192.168.1.10</Config>
+  <Config Name="Public URL" Target="GBRAIN_PUBLIC_URL" Default="https://192.168.1.10:3132" Mode="" Description="Public HTTPS origin clients use. Must match LAN Bind + port." Type="Variable" Display="always" Required="true" Mask="false">https://192.168.1.10:3132</Config>
+  <Config Name="Admin Bootstrap Token" Target="GBRAIN_ADMIN_BOOTSTRAP_TOKEN" Default="" Mode="" Description="First /admin login token. Alphanumeric. Secret." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Source Name" Target="SOURCE_NAME" Default="my-brain" Mode="" Description="Mounted brain source name. Must equal basename(BRAIN_PATH)." Type="Variable" Display="advanced" Required="false" Mask="false">my-brain</Config>
+  <Config Name="Brain UID" Target="BRAIN_UID" Default="999" Mode="" Description="UID for the brain bind mount. Unraid default 99:100." Type="Variable" Display="advanced" Required="false" Mask="false">999</Config>
+  <Config Name="Brain GID" Target="BRAIN_GID" Default="100" Mode="" Description="GID for the brain bind mount. Unraid default 99:100." Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="Ollama Base URL" Target="OLLAMA_BASE_URL" Default="http://192.168.1.10:11434/v1" Mode="" Description="openai-compat endpoint for embeddings + chat." Type="Variable" Display="advanced" Required="false" Mask="false">http://192.168.1.10:11434/v1</Config>
+  <Config Name="Ollama API Key" Target="OLLAMA_API_KEY" Default="ollama" Mode="" Description="Ollama API key. ollama is the local default." Type="Variable" Display="advanced" Required="false" Mask="false">ollama</Config>
+  <Config Name="Together API Key" Target="TOGETHER_API_KEY" Default="ollama" Mode="" Description="Together-compat key routed through Ollama /v1." Type="Variable" Display="advanced" Required="false" Mask="false">ollama</Config>
+</Container>

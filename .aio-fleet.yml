@@ -1,0 +1,29 @@
+schema_version: 1
+repo: gbrain-aio
+github_repo: wgross19/gbrain-vanilla-aio
+app_slug: gbrain-aio
+image:
+  name: wgross19/gbrain-aio
+  cache_scope: gbrain-aio-image
+  pytest_tag: gbrain-aio:pytest
+  publish_platforms: linux/amd64,linux/arm64
+release:
+  name: GBrain AIO
+  profile: changelog-version
+upstream:
+  name: GBrain
+  version_key: UPSTREAM_VERSION
+  digest_arg: UPSTREAM_IMAGE_DIGEST
+template:
+  xml_paths:
+    - gbrain-aio.xml
+  generated: false
+catalog:
+  published: false
+  assets:
+    - source: gbrain-aio.xml
+      target: gbrain-aio.xml
+tests:
+  unit: tests/test_dockerfile_policy.py
+  integration: tests/integration -m integration
+  checkout_submodules: false
