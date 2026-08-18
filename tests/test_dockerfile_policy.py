@@ -111,7 +111,8 @@ def test_cert_is_reused_when_present() -> None:
 def test_worker_is_supervised_and_waits_for_postgres() -> None:
     worker = _worker()
     assert "gbrain jobs supervisor" in worker  # nosec B101
-    assert "pg_isready" in worker  # nosec B101
+    assert "wait_postgres" in worker or "pg_isready" in worker  # nosec B101
+    assert "wait_config" in worker  # nosec B101
 
 
 def test_autopilot_service_waits_for_postgres_and_uses_no_worker() -> None:

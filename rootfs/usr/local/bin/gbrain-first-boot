@@ -136,11 +136,14 @@ mark_need_first_sync() {
 
 if [ ! -f "${CONFIG}" ]; then
   log "first boot: gbrain init embeddinggemma 768d"
+  # --skip-embed-check: keyless/empty Ollama must not hang the live embed probe.
+  # Spec: do init, then serve; do not block HTTP.
   gbrain_as gbrain init \
     --url "${DATABASE_URL}" \
     --embedding-model ollama:embeddinggemma \
     --embedding-dimensions 768 \
-    --non-interactive
+    --non-interactive \
+    --skip-embed-check
   ensure_git_repo
   ensure_safe_directory
   register_and_federate

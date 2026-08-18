@@ -69,6 +69,7 @@ def test_first_boot_uses_spec_init_and_schema() -> None:
     assert "--embedding-model ollama:embeddinggemma" in script  # nosec B101
     assert "--embedding-dimensions 768" in script  # nosec B101
     assert "--non-interactive" in script  # nosec B101
+    assert "--skip-embed-check" in script  # nosec B101
     assert "git init" in script  # nosec B101
     assert "uid 99" in script  # nosec B101
     assert "safe.directory" in script  # nosec B101
@@ -82,6 +83,7 @@ def test_first_boot_uses_spec_init_and_schema() -> None:
 def test_http_does_not_block_on_sync() -> None:
     http = _http()
     assert "gbrain-first-boot" in http  # nosec B101
+    assert "first-boot failed; starting serve" in http  # nosec B101
     assert "gbrain-enqueue-first-sync &" in http  # nosec B101
     assert "gbrain serve --http" in http  # nosec B101
     assert "jobs submit sync" not in http  # nosec B101
@@ -97,6 +99,7 @@ def test_enqueue_is_source_scoped_after_health() -> None:
 def test_worker_supervisor_unchanged() -> None:
     worker = _worker()
     assert "gbrain jobs supervisor --nice 10" in worker  # nosec B101
+    assert "wait_config" in worker  # nosec B101
     assert "autopilot" not in worker  # nosec B101
 
 
