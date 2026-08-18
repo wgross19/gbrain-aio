@@ -28,5 +28,5 @@ catalog:
       target: icons/gbrain.png
 tests:
   unit: tests/test_dockerfile_policy.py
-  integration: tests/integration -m integration
+  integration: tests/integration -m integration --timeout=90
   checkout_submodules: false
