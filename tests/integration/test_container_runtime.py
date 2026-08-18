@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import time
+
 import pytest
 
 from tests.helpers import (
     IMAGE_TAG,
     INTERNAL_HEALTH,
     PUBLISHED_PORT,
+    ContainerHandle,
     DockerRuntime,
     base_env,
     docker_available,
@@ -101,16 +104,27 @@ def test_persistent_data_survives_restart(runtime: DockerRuntime) -> None:
 
 
 # --- 8. Required environment variables are enforced --------------------------
+def _wait_for_container_exit(c: ContainerHandle, *, timeout: int = 60) -> None:
+    """Wait for the container to stop. Bootstrap exits 64 on invalid env."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if not c.is_running():
+            return
+        time.sleep(1)
+    raise AssertionError(
+        f"{c.name} did not exit within {timeout}s. Logs:\n{c.logs()}"
+    )
+
+
 def test_missing_postgres_password_fails_boot(runtime: DockerRuntime) -> None:
     env = base_env()
-    del env["POSTGRES_PASSWORD"]
+    # Empty string triggers the bootstrap's `-z` check (POSTGRES_PASSWORD is
+    # required). A `del` would not propagate because container() starts from a
+    # fresh base_env() and merges overrides on top.
+    env["POSTGRES_PASSWORD"] = ""
     with runtime.container(env_overrides=env) as c:
         # The container should exit (bootstrap exits 64) rather than run.
-        # Give it a moment to fail, then assert it is not running.
-        import time
-
-        time.sleep(5)
-        assert not c.is_running()  # nosec B101
+        _wait_for_container_exit(c)
         logs = c.logs()
         assert "POSTGRES_PASSWORD is required" in logs  # nosec B101
 
@@ -119,10 +133,7 @@ def test_non_alphanumeric_password_fails_boot(runtime: DockerRuntime) -> None:
     env = base_env()
     env["POSTGRES_PASSWORD"] = "has space!"
     with runtime.container(env_overrides=env) as c:
-        import time
-
-        time.sleep(5)
-        assert not c.is_running()  # nosec B101
+        _wait_for_container_exit(c)
         logs = c.logs()
         assert "must be alphanumeric" in logs  # nosec B101
 
@@ -148,13 +159,16 @@ def test_cert_generated_and_reused(runtime: DockerRuntime) -> None:
 
 # --- 10. Mounted brain path behaves correctly ---------------------------------
 def test_mounted_brain_path_is_visible(runtime: DockerRuntime) -> None:
-    with runtime.container() as c:
-        c.wait_for_internal_health()
-        # The brain mount is exposed at /test-brain (SOURCE_NAME=test-brain).
-        assert c.path_exists("/test-brain")  # nosec B101
-        # Bootstrap chowns it to BRAIN_UID:BRAIN_GID (999:100).
-        result = c.exec("stat -c '%u:%g' /test-brain")
-        assert result.stdout.strip() == "999:100"  # nosec B101
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as brain_dir:
+        with runtime.container(brain_mount=brain_dir) as c:
+            c.wait_for_internal_health()
+            # The brain mount is exposed at /test-brain (SOURCE_NAME=test-brain).
+            assert c.path_exists("/test-brain")  # nosec B101
+            # Bootstrap chowns it to BRAIN_UID:BRAIN_GID (999:100).
+            result = c.exec("stat -c '%u:%g' /test-brain")
+            assert result.stdout.strip() == "999:100"  # nosec B101
 
 
 # --- 11. Worker startup does not silently fail --------------------------------
@@ -162,6 +176,10 @@ def test_worker_process_runs(runtime: DockerRuntime) -> None:
     with runtime.container() as c:
         c.wait_for_internal_health()
         # The gbrain jobs supervisor must be running as a long-lived process.
-        result = c.exec("ps -eo args | grep -E 'gbrain jobs supervisor' | grep -v grep")
+        # `ps` is not installed in the image, so read /proc cmdlines instead.
+        # The supervisor runs as: bun run /opt/gbrain/src/cli.ts jobs supervisor
+        result = c.exec(
+            "for p in /proc/[0-9]*/cmdline; do tr '\\0' ' ' < \"$p\" 2>/dev/null; echo; done | grep -E 'jobs supervisor'"
+        )
         assert result.returncode == 0  # nosec B101
         assert "jobs supervisor" in result.stdout  # nosec B101

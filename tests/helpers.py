@@ -19,6 +19,10 @@ IMAGE_TAG = "gbrain-aio:pytest"
 INTERNAL_HEALTH = "http://127.0.0.1:3131/health"
 PUBLISHED_PORT = 3132
 
+# Per-test health-wait timeout. Overridable so a bad container fails fast
+# instead of stalling the suite for 240s per test.
+HEALTH_TIMEOUT = int(os.environ.get("AIO_PYTEST_HEALTH_TIMEOUT", "60"))
+
 
 def run_command(
     command: list[str],
@@ -114,12 +118,16 @@ def container_file_size(container_name: str, path: str) -> int:
 
 
 def base_env() -> dict[str, str]:
-    """Required env for a healthy first boot. Alphanumeric secrets only."""
+    """Required env for a healthy first boot. Alphanumeric secrets only.
+
+    GBrain requires GBRAIN_ADMIN_BOOTSTRAP_TOKEN to be >= 32 chars and match
+    [A-Za-z0-9_-]+ or it refuses to start serve. Use a valid-length token.
+    """
     return {
         "POSTGRES_USER": "gbrain",
         "POSTGRES_PASSWORD": "testpass123",
         "POSTGRES_DB": "gbrain",
-        "GBRAIN_ADMIN_BOOTSTRAP_TOKEN": "testbootstrap123",
+        "GBRAIN_ADMIN_BOOTSTRAP_TOKEN": "testbootstrap123456789012345678901234",
         "GBRAIN_LAN_BIND": "127.0.0.1",
         "GBRAIN_PUBLIC_URL": "https://127.0.0.1:3132",
         "SOURCE_NAME": "test-brain",
@@ -248,15 +256,22 @@ class ContainerHandle:
     def file_size(self, path: str) -> int:
         return container_file_size(self.name, path)
 
-    def wait_for_internal_health(self, *, timeout: int = 240) -> None:
-        """Wait for the internal GBrain HTTP health endpoint (127.0.0.1:3131)."""
+    def wait_for_internal_health(self, *, timeout: int | None = None) -> None:
+        """Wait for the internal GBrain HTTP health endpoint (127.0.0.1:3131).
+
+        GBrain binds 3131 on loopback INSIDE the container and it is never
+        published to the host (only 3132 via Caddy is). So the health probe
+        must run inside the container with `docker exec`, not from the test
+        runner's host network.
+        """
+        timeout = timeout or HEALTH_TIMEOUT
         deadline = time.time() + timeout
         while time.time() < deadline:
             if not self.is_running():
                 raise AssertionError(
                     f"{self.name} stopped before internal health. Logs:\n{self.logs()}"
                 )
-            result = run_command(["curl", "-fsS", INTERNAL_HEALTH], check=False)
+            result = self.exec("curl -fsS http://127.0.0.1:3131/health", check=False)
             if result.returncode == 0:
                 return
             time.sleep(2)
@@ -264,18 +279,22 @@ class ContainerHandle:
             f"{self.name} did not reach internal health. Logs:\n{self.logs()}"
         )
 
-    def wait_for_https(self, *, timeout: int = 240) -> None:
-        """Wait for the published HTTPS endpoint (Caddy on 3132)."""
+    def wait_for_https(self, *, timeout: int | None = None) -> None:
+        """Wait for the published HTTPS endpoint (Caddy on 3132).
+
+        Caddy serves HTTPS on 3132 INSIDE the container. The published host
+        port is on the Unraid host's docker bridge, which the test runner
+        (Hermes) cannot reach via its own loopback. So probe Caddy inside the
+        container with `docker exec`.
+        """
+        timeout = timeout or HEALTH_TIMEOUT
         deadline = time.time() + timeout
-        url = f"https://127.0.0.1:{self.http_port}/health"
         while time.time() < deadline:
             if not self.is_running():
                 raise AssertionError(
                     f"{self.name} stopped before HTTPS healthy. Logs:\n{self.logs()}"
                 )
-            result = run_command(
-                ["curl", "-kfsS", url], check=False
-            )
+            result = self.exec("curl -kfsS https://127.0.0.1:3132/health", check=False)
             if result.returncode == 0:
                 return
             time.sleep(2)

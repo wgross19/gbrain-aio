@@ -2,3 +2,6 @@
 data/
 gbrain-home/
 /caddy/
+__pycache__/
+*.pyc
+.venv-test/
