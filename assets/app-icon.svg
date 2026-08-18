@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a1a2e"/>
+      <stop offset="1" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="brain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fc3f7"/>
+      <stop offset="1" stop-color="#0288d1"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c4dff"/>
+      <stop offset="1" stop-color="#536dfe"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded square background -->
+  <rect x="8" y="8" width="496" height="496" rx="96" fill="url(#bg)"/>
+
+  <!-- knowledge graph edges -->
+  <g stroke="#4fc3f7" stroke-width="6" stroke-linecap="round" opacity="0.55">
+    <line x1="256" y1="150" x2="150" y2="300"/>
+    <line x1="256" y1="150" x2="362" y2="300"/>
+    <line x1="150" y1="300" x2="256" y2="360"/>
+    <line x1="362" y1="300" x2="256" y2="360"/>
+    <line x1="150" y1="300" x2="362" y2="300"/>
+  </g>
+
+  <!-- knowledge graph nodes -->
+  <g>
+    <circle cx="256" cy="150" r="26" fill="url(#node)"/>
+    <circle cx="150" cy="300" r="20" fill="url(#node)"/>
+    <circle cx="362" cy="300" r="20" fill="url(#node)"/>
+    <circle cx="256" cy="360" r="16" fill="url(#node)"/>
+  </g>
+
+  <!-- brain -->
+  <g transform="translate(256,256)">
+    <path d="M-70,-20
+             C-70,-70 -30,-95 0,-95
+             C30,-95 70,-70 70,-20
+             C70,10 55,30 40,40
+             C55,55 60,80 50,100
+             C40,120 20,125 0,120
+             C-20,125 -40,120 -50,100
+             C-60,80 -55,55 -40,40
+             C-55,30 -70,10 -70,-20 Z"
+          fill="url(#brain)" stroke="#0d47a1" stroke-width="4"/>
+    <!-- brain folds -->
+    <g stroke="#0d47a1" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7">
+      <path d="M-30,-60 C-10,-50 10,-50 30,-60"/>
+      <path d="M-45,-25 C-20,-15 20,-15 45,-25"/>
+      <path d="M-35,10 C-15,20 15,20 35,10"/>
+      <path d="M-25,45 C-10,55 10,55 25,45"/>
+      <path d="M-15,80 C-5,88 5,88 15,80"/>
+    </g>
+  </g>
+</svg>
