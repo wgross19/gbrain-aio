@@ -74,7 +74,7 @@ RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && chmod 755 /usr/local/bin/gbrain
 
 COPY rootfs/ /
-RUN chmod 755 /etc/cont-init.d/* /etc/services.d/*/run /usr/local/bin/gbrain-encode-url
+RUN chmod 755 /etc/cont-init.d/* /etc/services.d/*/run /usr/local/bin/* /usr/local/lib/gbrain-aio-lib.sh
 
 EXPOSE 3132
 VOLUME ["/data/postgres", "/var/lib/gbrain", "/config/caddy"]

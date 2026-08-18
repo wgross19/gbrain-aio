@@ -1,0 +1,157 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# First-boot init per docs/self-sufficient-spec.md.
+# Idempotent: missing config.json runs full init; existing config only
+# re-registers/federates a missing source.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+wait_postgres
+wait_vector
+
+NAME="$(source_name)"
+PATH_BRAIN="$(source_path)"
+CONFIG="$(config_json)"
+DB="${POSTGRES_DB:-gbrain}"
+export PGPASSWORD="${POSTGRES_PASSWORD:-}"
+
+ensure_git_repo() {
+  if [ ! -d "${PATH_BRAIN}" ]; then
+    log "brain path ${PATH_BRAIN} missing; skip git init"
+    return 0
+  fi
+  if [ -d "${PATH_BRAIN}/.git" ]; then
+    return 0
+  fi
+  log "git init ${PATH_BRAIN} as uid 99 / gid users"
+  gbrain_as git -C "${PATH_BRAIN}" init
+  gbrain_as git -C "${PATH_BRAIN}" add -A
+  gbrain_as git -C "${PATH_BRAIN}" \
+    -c user.name=gbrain \
+    -c user.email=gbrain@localhost \
+    commit --allow-empty -m "initial import"
+}
+
+ensure_safe_directory() {
+  if [ ! -d "${PATH_BRAIN}" ]; then
+    return 0
+  fi
+  gbrain_as git config --global --add safe.directory "${PATH_BRAIN}" || true
+}
+
+source_registered() {
+  local json
+  json="$(gbrain_as gbrain sources list --json 2>/dev/null || true)"
+  printf '%s' "${json}" | bun -e '
+    const fs = require("fs");
+    const name = process.argv[1];
+    let data = {};
+    try { data = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch { process.exit(1); }
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    process.exit(sources.some((s) => s && s.id === name) ? 0 : 1);
+  ' "${NAME}"
+}
+
+source_federated() {
+  local json
+  json="$(gbrain_as gbrain sources list --json 2>/dev/null || true)"
+  printf '%s' "${json}" | bun -e '
+    const fs = require("fs");
+    const name = process.argv[1];
+    let data = {};
+    try { data = JSON.parse(fs.readFileSync(0, "utf8") || "{}"); } catch { process.exit(1); }
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    const row = sources.find((s) => s && s.id === name);
+    process.exit(row && row.federated ? 0 : 1);
+  ' "${NAME}"
+}
+
+register_and_federate() {
+  if [ ! -d "${PATH_BRAIN}" ]; then
+    log "brain path ${PATH_BRAIN} missing; skip source register"
+    return 0
+  fi
+  if source_registered; then
+    if ! source_federated; then
+      log "federating existing source ${NAME}"
+      gbrain_as gbrain sources federate "${NAME}"
+    fi
+    return 0
+  fi
+  log "registering source ${NAME}"
+  gbrain_as gbrain sources add "${NAME}" --path "${PATH_BRAIN}" --name "${NAME}"
+  gbrain_as gbrain sources federate "${NAME}"
+}
+
+mirror_db_flags() {
+  local flags_json="$1"
+  printf '%s' "${flags_json}" | bun -e '
+    const fs = require("fs");
+    const flags = JSON.parse(fs.readFileSync(0, "utf8") || "{}");
+    for (const [key, value] of Object.entries(flags)) {
+      if (typeof key !== "string" || typeof value !== "string") continue;
+      if (!/^[a-z0-9_.]+$/.test(key)) continue;
+      const escaped = value.replace(/'\''/g, "'\'''\''");
+      process.stdout.write(
+        "INSERT INTO config (key, value) VALUES ('\''" + key + "'\'', '\''" + escaped +
+        "'\'') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;\n"
+      );
+    }
+  ' | gosu postgres psql -v ON_ERROR_STOP=1 -d "${DB}" >/dev/null
+}
+
+write_file_plane() {
+  local flags
+  APPLY_CHAT_GATED=0
+  if [ -n "${OLLAMA_BASE_URL:-}" ]; then
+    APPLY_CHAT_GATED=1
+    if [ -z "${TOGETHER_API_KEY:-}" ]; then
+      export TOGETHER_API_KEY=ollama
+    fi
+  fi
+  flags="$(
+    CONFIG_PATH="${CONFIG}" \
+    SOURCE_PATH="${PATH_BRAIN}" \
+    OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-}" \
+    CHAT_MODEL="${CHAT_MODEL:-deepseek-v4-flash:cloud}" \
+    SKILLOPT_ENABLED="${SKILLOPT_ENABLED:-}" \
+    NIGHTLY_QUALITY_PROBE="${NIGHTLY_QUALITY_PROBE:-}" \
+    PARSER_PROBE_ENABLED="${PARSER_PROBE_ENABLED:-}" \
+    APPLY_CHAT_GATED="${APPLY_CHAT_GATED}" \
+    /usr/local/bin/gbrain-merge-file-config
+  )"
+  chown gbrain:users "${CONFIG}" || true
+  chmod 600 "${CONFIG}" || true
+  mirror_db_flags "${flags}"
+}
+
+mark_need_first_sync() {
+  install -d -m 0755 /var/lib/gbrain/.gbrain
+  touch /var/lib/gbrain/.gbrain/need-first-sync
+  chown gbrain:users /var/lib/gbrain/.gbrain/need-first-sync || true
+}
+
+if [ ! -f "${CONFIG}" ]; then
+  log "first boot: gbrain init embeddinggemma 768d"
+  gbrain_as gbrain init \
+    --url "${DATABASE_URL}" \
+    --embedding-model ollama:embeddinggemma \
+    --embedding-dimensions 768 \
+    --non-interactive
+  ensure_git_repo
+  ensure_safe_directory
+  register_and_federate
+  log "first boot: schema use gbrain-everything"
+  gbrain_as gbrain schema use gbrain-everything
+  write_file_plane
+  mark_need_first_sync
+  log "first boot: file-plane config written"
+  exit 0
+fi
+
+log "config.json exists; skip init"
+ensure_safe_directory
+register_and_federate

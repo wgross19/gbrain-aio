@@ -9,16 +9,16 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/wgross19/gbrain-aio/issues</Support>
   <Project>https://github.com/wgross19/gbrain-aio</Project>
-  <Overview>Vanilla GBrain all-in-one for Unraid. One s6 container runs PostgreSQL 17 + pgvector, the official GBrain HTTP server, a Caddy TLS reverse proxy, and the GBrain job supervisor. Postgres listens on loopback only and is never published. Agents connect only through the MCP endpoint, never to Postgres.
+  <Overview>Vanilla GBrain all-in-one for Unraid. One s6 container runs PostgreSQL 17 + pgvector, the official GBrain HTTP server, a Caddy TLS reverse proxy, the GBrain job supervisor, and in-container maintain (autopilot every 30 minutes, nightly dream, weekly doctor). Postgres listens on loopback only and is never published. Agents connect only through the MCP endpoint, never to Postgres.
 
 First run:
 1. Set POSTGRES_PASSWORD (alphanumeric) and GBRAIN_ADMIN_BOOTSTRAP_TOKEN (32+ chars, alphanumeric + _-). Generate a token with: head -c 32 /dev/urandom | base64 | tr -d '+/=' | head -c 48
 2. Set GBRAIN_LAN_BIND to your Unraid host LAN IP and GBRAIN_PUBLIC_URL to https://&lt;that IP&gt;:3132. Both are local-network only.
 3. Create an empty brain folder (e.g. /mnt/user/my-brain) and set Brain Path to it. Set Source Name to the folder's name (e.g. my-brain).
-4. Start the container, then open https://&lt;lan&gt;:3132/admin/ and paste the bootstrap token.
+4. Start the container, then open https://&lt;lan&gt;:3132/admin/ and paste the bootstrap token. The container inits the brain, git-inits if needed, registers the source, and queues a sync. No docker exec required.
 5. Trust the generated CA once (caddy/certs/ca.pem) on any phone or WebView.
 
-Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat, or add a provider API key (Anthropic, OpenAI, Gemini, DeepSeek, Groq, Voyage) in the advanced fields.</Overview>
+Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat, or add a provider API key (Anthropic, OpenAI, Gemini, DeepSeek, Groq, Voyage) in the advanced fields. Leave optional URL, budget, and toggle fields empty to keep them off.</Overview>
   <Changes>### 2026-08-18&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Add AGENTS.md repository guidance&#xD;
@@ -99,6 +99,13 @@ Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and op
   <Config Name="Ollama Base URL" Target="OLLAMA_BASE_URL" Default="" Mode="" Description="OpenAI-compatible endpoint for embeddings + chat. Point at your local Ollama. Example: http://192.168.1.50:11434/v1 (replace with your Ollama host IP). Leave empty to skip local Ollama." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="Ollama API Key" Target="OLLAMA_API_KEY" Default="ollama" Mode="" Description="Ollama API key. 'ollama' is the default for a local Ollama. Only needed if your Ollama requires a key." Type="Variable" Display="advanced" Required="false" Mask="true">ollama</Config>
   <Config Name="Together API Key" Target="TOGETHER_API_KEY" Default="ollama" Mode="" Description="Together-compatible key. GBrain routes chat/dream/think through the Ollama /v1 endpoint using this key. For a local Ollama, 'ollama' works. Set a real Together key only if you route through Together." Type="Variable" Display="advanced" Required="false" Mask="true">ollama</Config>
+  <Config Name="Chat Model" Target="CHAT_MODEL" Default="deepseek-v4-flash:cloud" Mode="" Description="Chat model name used when OLLAMA_BASE_URL is set. Written as together:&lt;this name&gt;. Leave the default unless you know another model. Empty Ollama URL means no chat model (keyword/embed-or-skip)." Type="Variable" Display="advanced" Required="false" Mask="false">deepseek-v4-flash:cloud</Config>
+  <Config Name="Brain Git Push URL" Target="BRAIN_GIT_PUSH_URL" Default="" Mode="" Description="Optional. After a successful autopilot-cycle, push the mounted brain to this remote. Empty = off. Do not point a test copy at a live canonical remote. The token is not stored in the remote URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Brain Git Push Token" Target="BRAIN_GIT_PUSH_TOKEN" Default="" Mode="" Description="Optional. Masked token for Brain Git Push URL. Empty = unauthenticated push. Never pasted into git remote -v." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Doctor Remediate Max USD" Target="DOCTOR_REMEDIATE_MAX_USD" Default="" Mode="" Description="Optional. Weekly doctor exam always runs. Set a number to also run gbrain doctor --remediate --max-usd N for that run's estimate. Empty = exam only. Not a weekly wallet." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Skillopt Enabled" Target="SKILLOPT_ENABLED" Default="" Mode="" Description="Optional. Empty = off. Set 1/true/yes/on to enable cycle.skillopt.enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Nightly Quality Probe" Target="NIGHTLY_QUALITY_PROBE" Default="" Mode="" Description="Optional. Empty = off. Set 1/true/yes/on to enable autopilot.nightly_quality_probe.enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Parser Probe Enabled" Target="PARSER_PROBE_ENABLED" Default="" Mode="" Description="Optional. Empty = off. Set 1/true/yes/on to enable autopilot.conversation_parser_probe.enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="Anthropic API Key" Target="ANTHROPIC_API_KEY" Default="" Mode="" Description="Optional. Enables Claude models for chat/think. Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="OpenAI API Key" Target="OPENAI_API_KEY" Default="" Mode="" Description="Optional. Enables OpenAI models for chat/embeddings. Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="Google Gemini API Key" Target="GEMINI_API_KEY" Default="" Mode="" Description="Optional. Enables Google Gemini models. Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
