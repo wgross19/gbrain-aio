@@ -112,9 +112,7 @@ def _wait_for_container_exit(c: ContainerHandle, *, timeout: int = 60) -> None:
         if not c.is_running():
             return
         time.sleep(1)
-    raise AssertionError(
-        f"{c.name} did not exit within {timeout}s. Logs:\n{c.logs()}"
-    )
+    raise AssertionError(f"{c.name} did not exit within {timeout}s. Logs:\n{c.logs()}")
 
 
 def test_missing_postgres_password_fails_boot(runtime: DockerRuntime) -> None:

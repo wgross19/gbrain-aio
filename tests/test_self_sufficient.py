@@ -119,11 +119,21 @@ def test_dream_and_doctor_are_in_container_timers() -> None:
     assert "gbrain-dream-once" in dream  # nosec B101
     assert "gbrain-sleep-until monday 06:00" in doctor  # nosec B101
     assert "gbrain-doctor-once" in doctor  # nosec B101
-    assert "gbrain dream --dir" in _read("rootfs/usr/local/bin/gbrain-dream-once")  # nosec B101
-    assert "cycle_already_running" in _read("rootfs/usr/local/bin/gbrain-dream-once")  # nosec B101
-    assert "gbrain doctor --json" in _read("rootfs/usr/local/bin/gbrain-doctor-once")  # nosec B101
-    assert "last-doctor.json" in _read("rootfs/usr/local/bin/gbrain-doctor-once")  # nosec B101
-    assert "--remediate --max-usd" in _read("rootfs/usr/local/bin/gbrain-doctor-once")  # nosec B101
+    assert "gbrain dream --dir" in _read(
+        "rootfs/usr/local/bin/gbrain-dream-once"
+    )  # nosec B101
+    assert "cycle_already_running" in _read(
+        "rootfs/usr/local/bin/gbrain-dream-once"
+    )  # nosec B101
+    assert "gbrain doctor --json" in _read(
+        "rootfs/usr/local/bin/gbrain-doctor-once"
+    )  # nosec B101
+    assert "last-doctor.json" in _read(
+        "rootfs/usr/local/bin/gbrain-doctor-once"
+    )  # nosec B101
+    assert "--remediate --max-usd" in _read(
+        "rootfs/usr/local/bin/gbrain-doctor-once"
+    )  # nosec B101
 
 
 def test_no_force_push_and_token_stays_out_of_remote() -> None:
@@ -211,7 +221,9 @@ def _run_merge(env: dict[str, str], existing: dict | None = None) -> tuple[dict,
 def test_file_plane_keyless_install_has_no_chat_model() -> None:
     if shutil.which("bun") is None:
         merge = _read("rootfs/usr/local/bin/gbrain-merge-file-config")
-        assert "together:${chatModelName}" in merge or "together:" in merge  # nosec B101
+        assert (
+            "together:${chatModelName}" in merge or "together:" in merge
+        )  # nosec B101
         assert "ollamaBase" in merge  # nosec B101
         return
     cfg, flags = _run_merge(
@@ -249,10 +261,14 @@ def test_file_plane_chat_and_optional_toggles() -> None:
     )
     assert cfg["chat_model"] == "together:deepseek-v4-flash:cloud"  # nosec B101
     assert cfg["expansion_model"] == "together:deepseek-v4-flash:cloud"  # nosec B101
-    assert cfg["provider_base_urls"]["together"] == "http://example.invalid:11434/v1"  # nosec B101
+    assert (
+        cfg["provider_base_urls"]["together"] == "http://example.invalid:11434/v1"
+    )  # nosec B101
     assert cfg["dream"]["drift"]["enabled"] is True  # nosec B101
     assert cfg["cycle"]["skillopt"]["enabled"] is True  # nosec B101
     assert cfg["autopilot"]["nightly_quality_probe"]["enabled"] is True  # nosec B101
-    assert cfg["autopilot"]["conversation_parser_probe"]["enabled"] is True  # nosec B101
+    assert (
+        cfg["autopilot"]["conversation_parser_probe"]["enabled"] is True
+    )  # nosec B101
     assert flags["dream.drift.enabled"] == "true"  # nosec B101
     assert flags["cycle.skillopt.enabled"] == "true"  # nosec B101
