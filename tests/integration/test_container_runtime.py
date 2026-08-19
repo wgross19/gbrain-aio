@@ -12,6 +12,7 @@ from tests.helpers import (
     DockerRuntime,
     base_env,
     docker_available,
+    docker_volume,
 )
 
 pytestmark = pytest.mark.integration
@@ -159,10 +160,15 @@ def test_cert_generated_and_reused(runtime: DockerRuntime) -> None:
 
 # --- 10. Mounted brain path behaves correctly ---------------------------------
 def test_mounted_brain_path_is_visible(runtime: DockerRuntime) -> None:
-    import tempfile
-
-    with tempfile.TemporaryDirectory() as brain_dir:
-        with runtime.container(brain_mount=brain_dir) as c:
+    # Use a Docker named volume for the brain mount rather than a host tempdir.
+    # The container chowns the mounted brain to BRAIN_UID:BRAIN_GID (99:100)
+    # during first boot. On CI runners (e.g. GitHub Actions) the runner user
+    # cannot delete a host bind-mount directory once the container has chowned
+    # it to 99:100, so a tempdir leaks and `TemporaryDirectory` cleanup raises
+    # PermissionError. A named volume is owned by Docker, chowns fine, and is
+    # removed cleanly regardless of the runner's user.
+    with docker_volume("gbrain-aio-pytest-brain") as brain_volume:
+        with runtime.container(brain_mount=brain_volume) as c:
             c.wait_for_internal_health()
             # The brain mount is exposed at /test-brain (SOURCE_NAME=test-brain).
             assert c.path_exists("/test-brain")  # nosec B101
