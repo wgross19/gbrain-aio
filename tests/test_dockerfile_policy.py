@@ -18,7 +18,11 @@ def _compose_ports_block() -> str:
             in_ports = True
             continue
         if in_ports:
-            if stripped and not stripped.startswith("#") and not stripped.startswith("-"):
+            if (
+                stripped
+                and not stripped.startswith("#")
+                and not stripped.startswith("-")
+            ):
                 break
             if stripped.startswith("-"):
                 out.append(stripped)
@@ -36,7 +40,11 @@ def _compose_env_block() -> str:
             in_env = True
             continue
         if in_env:
-            if stripped and not stripped.startswith("#") and not stripped.startswith("-"):
+            if (
+                stripped
+                and not stripped.startswith("#")
+                and not stripped.startswith("-")
+            ):
                 break
             if stripped.startswith("-"):
                 out.append(stripped)
@@ -68,6 +76,7 @@ def _autopilot() -> str:
 
 
 # --- Security invariants (static, no Docker needed) ---------------------------
+
 
 def test_postgres_5432_is_never_published() -> None:
     ports = _compose_ports_block()
