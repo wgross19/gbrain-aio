@@ -1,6 +1,6 @@
 # Spec — Self-sufficient gbrain-aio
 
-Status: **implemented as PR** (2026-08-18). Open review: https://github.com/wgross19/gbrain-aio/pull/2 (`feat/self-sufficient-maintain`). Not merged. GHCR not published. Live gbrain-aio not restarted.
+Status: **implemented as PR** (2026-08-18). Open review: <https://github.com/wgross19/gbrain-aio/pull/2> (`feat/self-sufficient-maintain`). Not merged. GHCR not published. Live gbrain-aio not restarted.
 
 Goal: a new Unraid user fills the template, clicks Apply, and the container starts healthy, indexes the mounted brain, and keeps itself fresh. No Hermes cron and no `docker exec` required for default maintenance.
 
@@ -14,13 +14,13 @@ Goal: a new Unraid user fills the template, clicks Apply, and the container star
 
 ## In-container schedule
 
-| Job | When | Command / process |
-|---|---|---|
-| Jobs supervisor | always | existing `gbrain-worker` (`gbrain jobs supervisor --nice`) |
-| Autopilot | every **30 min** | s6 longrun: `gbrain autopilot --repo /${SOURCE_NAME} --no-worker` |
-| Dream | nightly **02:00** | `gbrain dream --dir /${SOURCE_NAME}` (wait on cycle lock) |
-| Doctor | weekly **Mon 06:00** | `gbrain doctor --json` → `~/.gbrain/last-doctor.json`; remediate only if cap set |
-| Git push | after a **successful autopilot-cycle** | only if `BRAIN_GIT_PUSH_URL` is set |
+| Job             | When                                   | Command / process                                                                |
+| --------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| Jobs supervisor | always                                 | existing `gbrain-worker` (`gbrain jobs supervisor --nice`)                       |
+| Autopilot       | every **30 min**                       | s6 longrun: `gbrain autopilot --repo /${SOURCE_NAME} --no-worker`                |
+| Dream           | nightly **02:00**                      | `gbrain dream --dir /${SOURCE_NAME}` (wait on cycle lock)                        |
+| Doctor          | weekly **Mon 06:00**                   | `gbrain doctor --json` → `~/.gbrain/last-doctor.json`; remediate only if cap set |
+| Git push        | after a **successful autopilot-cycle** | only if `BRAIN_GIT_PUSH_URL` is set                                              |
 
 Autopilot interval is 30 minutes (not upstream’s 5-minute default). Dream and doctor times match the official gbrain cron guide. Dream waits if an autopilot-cycle holds the lock.
 
@@ -116,14 +116,14 @@ If estimated plan cost exceeds N, abort and submit nothing. Not a weekly wallet.
 
 ### On if a chat model exists
 
-| Flag | When | Why |
-|---|---|---|
-| `dream.drift.enabled` | nightly dream | Stale-take judge |
-| `cycle.enrich_thin.enabled` | nightly dream | Person/company stubs; 3/source; $1/source $5/tick |
-| `cycle.conversation_facts_backfill.enabled` | nightly dream | Facts from conversation pages; no-op if none |
-| `conversation_parser.llm_fallback_enabled` | always when chat exists | Regex first; LLM if parse is weak |
-| `cycle.grade_takes.auto_resolve.enabled` | nightly grade | Auto-apply verdicts at confidence ≥ 0.95 |
-| extract_atoms / propose_takes | autopilot + dream | Already gated on chat |
+| Flag                                        | When                    | Why                                               |
+| ------------------------------------------- | ----------------------- | ------------------------------------------------- |
+| `dream.drift.enabled`                       | nightly dream           | Stale-take judge                                  |
+| `cycle.enrich_thin.enabled`                 | nightly dream           | Person/company stubs; 3/source; $1/source $5/tick |
+| `cycle.conversation_facts_backfill.enabled` | nightly dream           | Facts from conversation pages; no-op if none      |
+| `conversation_parser.llm_fallback_enabled`  | always when chat exists | Regex first; LLM if parse is weak                 |
+| `cycle.grade_takes.auto_resolve.enabled`    | nightly grade           | Auto-apply verdicts at confidence ≥ 0.95          |
+| extract_atoms / propose_takes               | autopilot + dream       | Already gated on chat                             |
 
 ### Always on
 
@@ -132,11 +132,11 @@ If estimated plan cost exceeds N, abort and submit nothing. Not a weekly wallet.
 
 ### Template toggle, default off
 
-| Env / field | Flag |
-|---|---|
-| `SKILLOPT_ENABLED` | `cycle.skillopt.enabled` |
-| `NIGHTLY_QUALITY_PROBE` | `autopilot.nightly_quality_probe.enabled` |
-| `PARSER_PROBE_ENABLED` | `autopilot.conversation_parser_probe.enabled` |
+| Env / field             | Flag                                          |
+| ----------------------- | --------------------------------------------- |
+| `SKILLOPT_ENABLED`      | `cycle.skillopt.enabled`                      |
+| `NIGHTLY_QUALITY_PROBE` | `autopilot.nightly_quality_probe.enabled`     |
+| `PARSER_PROBE_ENABLED`  | `autopilot.conversation_parser_probe.enabled` |
 
 ### Stay off
 
@@ -147,11 +147,11 @@ If estimated plan cost exceeds N, abort and submit nothing. Not a weekly wallet.
 
 ## Out of the default container
 
-| Item | Why | Later hook |
-|---|---|---|
-| Session synthesize corpus | Needs Hermes `.txt` exporter | Mount corpus dir; set `dream.synthesize.session_corpus_dir`. Never mount Hermes JSONL |
-| Gmail / X / Readwise runners | Image has the recipe only | Hermes collectors write into the brain |
-| Live Cortex backup | Not this container’s job | Optional push is the **mounted** brain only |
+| Item                         | Why                          | Later hook                                                                            |
+| ---------------------------- | ---------------------------- | ------------------------------------------------------------------------------------- |
+| Session synthesize corpus    | Needs Hermes `.txt` exporter | Mount corpus dir; set `dream.synthesize.session_corpus_dir`. Never mount Hermes JSONL |
+| Gmail / X / Readwise runners | Image has the recipe only    | Hermes collectors write into the brain                                                |
+| Live Cortex backup           | Not this container’s job     | Optional push is the **mounted** brain only                                           |
 
 ## LLM vs no-LLM (for operators)
 

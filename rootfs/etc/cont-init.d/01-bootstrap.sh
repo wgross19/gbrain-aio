@@ -1,5 +1,6 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
+# shellcheck disable=SC2312,SC2249 # intentional: log() masks return; case has no default
 set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
@@ -10,39 +11,45 @@ chown -R postgres:postgres /data/postgres /run/postgresql
 
 SOURCE_NAME="${SOURCE_NAME:-cortext-test}"
 SOURCE_PATH="/${SOURCE_NAME}"
-if [ -d "${SOURCE_PATH}" ]; then
-  BRAIN_UID="${BRAIN_UID:-999}"
-  BRAIN_GID="${BRAIN_GID:-100}"
-  case "${BRAIN_UID}${BRAIN_GID}" in
-    *[!0-9]*) log "error: BRAIN_UID/BRAIN_GID must be numeric"; exit 64 ;;
-  esac
-  chown -R "${BRAIN_UID}:${BRAIN_GID}" "${SOURCE_PATH}" || log "warn: could not chown ${SOURCE_PATH}"
+if [[ -d ${SOURCE_PATH} ]]; then
+	BRAIN_UID="${BRAIN_UID:-999}"
+	BRAIN_GID="${BRAIN_GID:-100}"
+	case "${BRAIN_UID}${BRAIN_GID}" in
+	*[!0-9]*)
+		log "error: BRAIN_UID/BRAIN_GID must be numeric"
+		exit 64
+		;;
+	esac
+	chown -R "${BRAIN_UID}:${BRAIN_GID}" "${SOURCE_PATH}" || log "warn: could not chown ${SOURCE_PATH}"
 fi
 
-if [ -z "${POSTGRES_PASSWORD:-}" ]; then
-  log "error: POSTGRES_PASSWORD is required"
-  exit 64
+if [[ -z ${POSTGRES_PASSWORD-} ]]; then
+	log "error: POSTGRES_PASSWORD is required"
+	exit 64
 fi
 case "${POSTGRES_PASSWORD}" in
-  *[!A-Za-z0-9]*) log "error: POSTGRES_PASSWORD must be alphanumeric (A-Za-z0-9)"; exit 64 ;;
+*[!A-Za-z0-9]*)
+	log "error: POSTGRES_PASSWORD must be alphanumeric (A-Za-z0-9)"
+	exit 64
+	;;
 esac
 
 ENCODED_URL="$(
-  POSTGRES_USER="${POSTGRES_USER:-gbrain}" \
-  POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" \
-  POSTGRES_DB="${POSTGRES_DB:-gbrain}" \
-  GBRAIN_DB_HOST="${GBRAIN_DB_HOST:-127.0.0.1}" \
-  GBRAIN_DB_PORT="${GBRAIN_DB_PORT:-5432}" \
-  /usr/local/bin/gbrain-encode-url
+	POSTGRES_USER="${POSTGRES_USER:-gbrain}" \
+		POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" \
+		POSTGRES_DB="${POSTGRES_DB:-gbrain}" \
+		GBRAIN_DB_HOST="${GBRAIN_DB_HOST:-127.0.0.1}" \
+		GBRAIN_DB_PORT="${GBRAIN_DB_PORT:-5432}" \
+		/usr/local/bin/gbrain-encode-url
 )"
 
-TOGETHER_KEY="${TOGETHER_API_KEY:-}"
-if [ -n "${OLLAMA_BASE_URL:-}" ] && [ -z "${TOGETHER_KEY}" ]; then
-  TOGETHER_KEY=ollama
+TOGETHER_KEY="${TOGETHER_API_KEY-}"
+if [[ -n ${OLLAMA_BASE_URL-} ]] && [[ -z ${TOGETHER_KEY} ]]; then
+	TOGETHER_KEY=ollama
 fi
 
 umask 077
-cat > /var/lib/gbrain/runtime.env <<EOF
+cat >/var/lib/gbrain/runtime.env <<EOF
 DATABASE_URL=${ENCODED_URL}
 GBRAIN_DATABASE_URL=${ENCODED_URL}
 GBRAIN_HOME=/var/lib/gbrain

@@ -125,9 +125,9 @@ def base_env() -> dict[str, str]:
     """
     return {
         "POSTGRES_USER": "gbrain",
-        "POSTGRES_PASSWORD": "testpass123",
+        "POSTGRES_PASSWORD": "testpass123",  # nosec B105 - test fixture
         "POSTGRES_DB": "gbrain",
-        "GBRAIN_ADMIN_BOOTSTRAP_TOKEN": "testbootstrap123456789012345678901234",
+        "GBRAIN_ADMIN_BOOTSTRAP_TOKEN": "testbootstrap123456789012345678901234",  # nosec B105 - test fixture
         "GBRAIN_LAN_BIND": "127.0.0.1",
         "GBRAIN_PUBLIC_URL": "https://127.0.0.1:3132",
         "SOURCE_NAME": "test-brain",
