@@ -3,7 +3,7 @@ repo: gbrain-aio
 github_repo: wgross19/gbrain-aio
 app_slug: gbrain-aio
 image:
-  name: wgross19/gbrain-aio
+  name: dub19/gbrain-aio
   cache_scope: gbrain-aio-image
   pytest_tag: gbrain-aio:pytest
   publish_platforms: linux/amd64,linux/arm64
