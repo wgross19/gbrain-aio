@@ -48,11 +48,17 @@ cfg.schema_pack = "gbrain-everything";
 const mcp = asRecord(cfg.mcp);
 mcp.publish_skills = true;
 mcp.publish_advisor = true;
+// Bundle ships the curated brain-operation skills at /opt/gbrain/skills
+// (manifest.json). Remote MCP list_skills/get_skill have no install-path
+// auto-detect by design, so an explicit skills_dir is required for the
+// catalog to be reachable over MCP. Full catalog by default.
+mcp.skills_dir = "/opt/gbrain/skills";
 cfg.mcp = mcp;
 
 const dbFlags: Record<string, string> = {
   "mcp.publish_skills": "true",
   "mcp.publish_advisor": "true",
+  "mcp.skills_dir": "/opt/gbrain/skills",
 };
 
 if (sourcePath) {

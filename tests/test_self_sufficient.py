@@ -226,10 +226,12 @@ def test_file_plane_keyless_install_has_no_chat_model() -> None:
     assert cfg["sync"]["repo_path"] == "/my-brain"  # nosec B101
     assert cfg["mcp"]["publish_advisor"] is True  # nosec B101
     assert cfg["mcp"]["publish_skills"] is True  # nosec B101
+    assert cfg["mcp"]["skills_dir"] == "/opt/gbrain/skills"  # nosec B101
     assert "chat_model" not in cfg  # nosec B101
     assert "dream.drift.enabled" not in flags  # nosec B101
     assert "cycle.skillopt.enabled" not in flags  # nosec B101
     assert flags["mcp.publish_advisor"] == "true"  # nosec B101
+    assert flags["mcp.skills_dir"] == "/opt/gbrain/skills"  # nosec B101
 
 
 def test_file_plane_chat_and_optional_toggles() -> None:
