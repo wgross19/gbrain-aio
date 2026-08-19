@@ -120,7 +120,7 @@ def test_missing_postgres_password_fails_boot(runtime: DockerRuntime) -> None:
     # Empty string triggers the bootstrap's `-z` check (POSTGRES_PASSWORD is
     # required). A `del` would not propagate because container() starts from a
     # fresh base_env() and merges overrides on top.
-    env["POSTGRES_PASSWORD"] = ""
+    env["POSTGRES_PASSWORD"] = ""  # nosec B105 - test fixture
     with runtime.container(env_overrides=env) as c:
         # The container should exit (bootstrap exits 64) rather than run.
         _wait_for_container_exit(c)
@@ -130,7 +130,7 @@ def test_missing_postgres_password_fails_boot(runtime: DockerRuntime) -> None:
 
 def test_non_alphanumeric_password_fails_boot(runtime: DockerRuntime) -> None:
     env = base_env()
-    env["POSTGRES_PASSWORD"] = "has space!"
+    env["POSTGRES_PASSWORD"] = "has space!"  # nosec B105 - test fixture
     with runtime.container(env_overrides=env) as c:
         _wait_for_container_exit(c)
         logs = c.logs()

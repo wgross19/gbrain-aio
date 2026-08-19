@@ -123,7 +123,7 @@ If `config.json` already exists, init is skipped. A missing source is re-registe
 
 ## Layout
 
-```
+```text
 Dockerfile
 compose.yaml
 .env.example

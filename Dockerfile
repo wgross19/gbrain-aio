@@ -3,9 +3,12 @@ ARG CADDY_IMAGE=caddy:2.10.2-alpine@sha256:d8c17a862962def15cde69863a3a463f25a26
 ARG DEBIAN_IMAGE=debian:bookworm-slim@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143
 ARG S6_OVERLAY_VERSION=3.2.1.0
 
+#checkov:skip=CKV_DOCKER_7:base images are digest-pinned, not 'latest'
 FROM ${BUN_IMAGE} AS bun
+#checkov:skip=CKV_DOCKER_7:base images are digest-pinned, not 'latest'
 FROM ${CADDY_IMAGE} AS caddy
 
+#checkov:skip=CKV_DOCKER_8:s6 is PID 1 and must start as root; it drops privileges to gbrain (99:100) for runtime services
 FROM ${DEBIAN_IMAGE}
 
 ARG GBRAIN_GIT_SHA=864dec4f199f420dba1ea6c5bc72e824e09de978

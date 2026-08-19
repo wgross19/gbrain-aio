@@ -1,5 +1,6 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
+# shellcheck disable=SC2312,SC2034,SC2249 # intentional: log() masks return; loop var; case has no default
 # Shared helpers for gbrain-aio first-boot and s6 services.
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }

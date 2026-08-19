@@ -57,11 +57,11 @@ services:
       # Postgres database name. Keep "gbrain". (Variable)
       POSTGRES_DB: ${POSTGRES_DB:-gbrain}
       # Postgres binds to loopback INSIDE the container. Do not expose. (Fixed)
-      GBRAIN_DB_HOST: "127.0.0.1"
-      GBRAIN_DB_PORT: "5432"
+      GBRAIN_DB_HOST: "127.0.0.1" # yamllint disable-line rule:quoted-strings
+      GBRAIN_DB_PORT: "5432" # yamllint disable-line rule:quoted-strings
       # GBrain HTTP listens on loopback inside the container. Caddy fronts it. (Fixed)
-      GBRAIN_HTTP_PORT: "3131"
-      GBRAIN_HTTP_BIND: "127.0.0.1"
+      GBRAIN_HTTP_PORT: "3131" # yamllint disable-line rule:quoted-strings
+      GBRAIN_HTTP_BIND: "127.0.0.1" # yamllint disable-line rule:quoted-strings
       # Public HTTPS origin clients use. Must match the published port. (Variable)
       GBRAIN_PUBLIC_URL: ${GBRAIN_PUBLIC_URL:-https://192.168.1.50:3132}
       # Admin bootstrap token for first /admin login. Alphanumeric. (Variable, secret)
@@ -118,7 +118,7 @@ services:
     # Probes the internal GBrain HTTP health endpoint. 120s start grace for
     # first-boot Postgres init + migrations.
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3131/health"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3131/health"] # yamllint disable-line rule:quoted-strings
       interval: 15s
       timeout: 5s
       retries: 10
@@ -127,7 +127,7 @@ services:
     # --- Extra hosts (Unraid: <ExtraHosts>) ----------------------------------
     # Lets the container reach the host's Ollama via host.docker.internal.
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway" # yamllint disable-line rule:quoted-strings
 
     # --- Security (Unraid: <Privileged>false</Privileged>) ------------------
     # no-new-privileges:true. Do NOT run privileged. No host Docker socket.
