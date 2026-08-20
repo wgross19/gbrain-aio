@@ -19,11 +19,18 @@ First run:
 5. Trust the generated CA once (caddy/certs/ca.pem) on any phone or WebView.
 
 Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat, or add a provider API key (Anthropic, OpenAI, Gemini, DeepSeek, Groq, Voyage) in the advanced fields. Leave optional URL, budget, and toggle fields empty to keep them off.</Overview>
-  <Changes>### 2026-08-18&#xD;
+  <Changes>### 2026-08-20&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Lock self-sufficient gbrain-aio maintain spec&#xD;
-- Auto-init brain on first boot + document config gotchas&#xD;
-- Self-sufficient first-boot, autopilot, dream, and doctor (#2)</Changes>
+- Split base image ARGs and add upstream monitor config&#xD;
+- Default mcp.skills_dir to bundled catalog for MCP list_skills&#xD;
+- Point XML to Docker Hub repository to satisfy fleet validation&#xD;
+- Use named volume for brain mount to pass on CI runners&#xD;
+- Correct Docker Hub namespace to dub19&#xD;
+- Make caddy upstream monitor notify-only&#xD;
+- Optimize app icon to satisfy trunk oxipng gate&#xD;
+- Bump gbrain to v0.46.23.0&#xD;
+- Apply trunk fmt/black formatting to satisfy fleet lint gate&#xD;
+- Suppress intentional lint findings to pass the fleet trunk gate</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
