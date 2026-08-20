@@ -43,13 +43,10 @@ upstream:
       name: Caddy
       source: github-tags
       repo: caddyserver/caddy
-      image: caddy
-      digest_source: dockerhub
       dockerfile: Dockerfile
       version_key: CADDY_VERSION
-      digest_key: CADDY_DIGEST
       stable_only: true
-      strategy: pr
+      strategy: notify
       release_notes_url: https://github.com/caddyserver/caddy/releases
 template:
   xml_paths:
