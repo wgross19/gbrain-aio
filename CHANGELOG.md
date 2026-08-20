@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.46.23.0-aio.1 - 2026-08-20
+
+### Features
+
+- Split base image ARGs and add upstream monitor config
+
+### Fixes
+
+- Default mcp.skills_dir to bundled catalog for MCP list_skills
+
+- Point XML to Docker Hub repository to satisfy fleet validation
+
+- Use named volume for brain mount to pass on CI runners
+
+- Correct Docker Hub namespace to dub19
+
+- Make caddy upstream monitor notify-only
+
+### Maintenance
+
+- Optimize app icon to satisfy trunk oxipng gate
+
+- Bump gbrain to v0.46.23.0
+
+### style
+
+- Apply trunk fmt/black formatting to satisfy fleet lint gate
+
+- Suppress intentional lint findings to pass the fleet trunk gate
+
 ## v0.46.14.0-aio.2 - 2026-08-18
 
 ### Documentation
