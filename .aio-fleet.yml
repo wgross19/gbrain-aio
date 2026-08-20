@@ -15,12 +15,48 @@ upstream:
   name: GBrain
   version_key: UPSTREAM_VERSION
   digest_arg: UPSTREAM_IMAGE_DIGEST
+  monitor:
+    - component: gbrain
+      name: GBrain
+      source: github-tags
+      repo: garrytan/gbrain
+      dockerfile: Dockerfile
+      version_key: UPSTREAM_VERSION
+      commit_key: GBRAIN_GIT_SHA
+      stable_only: true
+      strategy: pr
+      release_notes_url: https://github.com/garrytan/gbrain/releases
+    - component: bun
+      name: Bun
+      source: github-releases
+      repo: oven-sh/bun
+      image: oven/bun
+      digest_source: dockerhub
+      dockerfile: Dockerfile
+      version_key: BUN_VERSION
+      digest_key: BUN_DIGEST
+      version_strip_prefix: bun-v
+      stable_only: true
+      strategy: notify
+      release_notes_url: https://github.com/oven-sh/bun/releases
+    - component: caddy
+      name: Caddy
+      source: github-tags
+      repo: caddyserver/caddy
+      image: caddy
+      digest_source: dockerhub
+      dockerfile: Dockerfile
+      version_key: CADDY_VERSION
+      digest_key: CADDY_DIGEST
+      stable_only: true
+      strategy: pr
+      release_notes_url: https://github.com/caddyserver/caddy/releases
 template:
   xml_paths:
     - gbrain-aio.xml
   generated: false
 catalog:
-  published: false
+  published: true
   assets:
     - source: gbrain-aio.xml
       target: gbrain-aio.xml
