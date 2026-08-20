@@ -9,16 +9,14 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/wgross19/gbrain-aio/issues</Support>
   <Project>https://github.com/wgross19/gbrain-aio</Project>
-  <Overview>Vanilla GBrain all-in-one for Unraid. One s6 container runs PostgreSQL 17 + pgvector, the official GBrain HTTP server, a Caddy TLS reverse proxy, the GBrain job supervisor, and in-container maintain (autopilot every 30 minutes, nightly dream, weekly doctor). Postgres listens on loopback only and is never published. Agents connect only through the MCP endpoint, never to Postgres.
+  <Overview>GBrain all-in-one for Unraid: a hosted knowledge base and MCP server for AI agents (Hermes Agent, OpenClaw, Codex). One container runs GBrain, PostgreSQL 17 + pgvector, Caddy TLS, and the job supervisor. Agents connect over HTTPS — Postgres is never exposed.
 
-First run:
-1. Set POSTGRES_PASSWORD (alphanumeric) and GBRAIN_ADMIN_BOOTSTRAP_TOKEN (32+ chars, alphanumeric + _-). Generate a token with: head -c 32 /dev/urandom | base64 | tr -d '+/=' | head -c 48
-2. Set GBRAIN_LAN_BIND to your Unraid host LAN IP and GBRAIN_PUBLIC_URL to https://&lt;that IP&gt;:3132. Both are local-network only.
-3. Create an empty brain folder (e.g. /mnt/user/my-brain) and set Brain Path to it. Set Source Name to the folder's name (e.g. my-brain).
-4. Start the container, then open https://&lt;lan&gt;:3132/admin/ and paste the bootstrap token. The container inits the brain, git-inits if needed, registers the source, and queues a sync. No docker exec required.
-5. Trust the generated CA once (caddy/certs/ca.pem) on any phone or WebView.
-
-Advanced users can point OLLAMA_BASE_URL at a local Ollama for embeddings and openai-compat chat, or add a provider API key (Anthropic, OpenAI, Gemini, DeepSeek, Groq, Voyage) in the advanced fields. Leave optional URL, budget, and toggle fields empty to keep them off.</Overview>
+First run (details are in each field's help text):
+1. Set Postgres Password and Admin Bootstrap Token.
+2. Set LAN Bind and Public URL to your host IP.
+3. Set Brain Path to an empty folder.
+4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
+5. Trust the generated CA once.</Overview>
   <Changes>### 2026-08-20&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Split base image ARGs and add upstream monitor config&#xD;
