@@ -15,14 +15,14 @@ FROM ${CADDY_IMAGE}@${CADDY_DIGEST} AS caddy
 #checkov:skip=CKV_DOCKER_8:s6 is PID 1 and must start as root; it drops privileges to gbrain (99:100) for runtime services
 FROM ${DEBIAN_IMAGE}
 
-ARG GBRAIN_GIT_SHA=07f5d28dcfe1b117cfd1a2b5d57c9fe77efc74ee
+ARG GBRAIN_GIT_SHA=3f2f300483bb24f97e0276f44ee3053b5d30a36b
 ARG GBRAIN_REPO=https://github.com/garrytan/gbrain.git
 ARG S6_OVERLAY_VERSION=3.2.1.0
 ARG POSTGRES_MAJOR=17
 # Upstream GBrain release version. The fleet reads this ARG (via
 # version_key: UPSTREAM_VERSION) to compute the release tag. The build stays
 # pinned to GBRAIN_GIT_SHA; this is the discoverable release label only.
-ARG UPSTREAM_VERSION=v0.46.23.0
+ARG UPSTREAM_VERSION=v0.47.6.0
 
 LABEL org.opencontainers.image.title="gbrain-aio" \
       org.opencontainers.image.source="${GBRAIN_REPO}" \
