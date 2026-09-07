@@ -151,7 +151,11 @@ def test_no_hermes_jsonl_and_no_crontab_install() -> None:
     assert "session_corpus" not in blob  # nosec B101
     assert "autopilot --install" not in blob  # nosec B101
     assert ".jsonl" not in _xml()  # nosec B101
-    assert "hermes" not in _xml().lower()  # nosec B101
+    # Guard against Hermes *wiring* (session capture / cron install / home
+    # mounts) in the template. Product prose naming compatible agents (e.g.
+    # the Overview) is allowed — that wording is not coupling.
+    for marker in ("session_corpus", ".jsonl", "crontab", "HERMES_HOME"):
+        assert marker not in _xml()  # nosec B101
 
 
 def test_xml_has_optional_fields_empty_by_default() -> None:
