@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.2 - 2026-09-12
+
+### Fixes
+
+- Cert idempotence check matched wrong SAN rendering (IP Address: vs IP:)
+
+- Repin debian base to multi-arch digest (arm64 build broke under qemu)
+
+### Tests
+
+- Accept shfmt's ${VAR-} normalization in the env-scan regex
+
+### style
+
+- Trunk fmt docs + shellcheck fixes; drop dead loop in contract test
+
+- Black formatting on test files
+
+- Nosec annotations for bandit in contract test
+
+- Black reformat contract test
+
+- Nosec B405 on the ET import
+
+- Bandit nosec codes space-separated
+
 ## v0.50.0.0-aio.1 - 2026-09-12
 
 ### Documentation

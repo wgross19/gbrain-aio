@@ -19,14 +19,15 @@ First run (details are in each field's help text):
 5. Trust the generated CA once.</Overview>
   <Changes>### 2026-09-12&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Rewrite README for readability and published-app polish&#xD;
-- Make CA Overview concise (1-line pitch + high-level setup)&#xD;
-- Rewrite spec + customization guide for the trigger model&#xD;
-- Universal XML-triggered setup + bake v0.50.0.0 prerequisites&#xD;
-- Bump gbrain to v0.48.2.0 (#34)&#xD;
-- Bump gbrain to v0.48.5.0 (#38)&#xD;
-- Bump gbrain to v0.50.0.0 (#39)&#xD;
-- Assert no Hermes wiring in XML, not the bare word</Changes>
+- Cert idempotence check matched wrong SAN rendering (IP Address: vs IP:)&#xD;
+- Repin debian base to multi-arch digest (arm64 build broke under qemu)&#xD;
+- Accept shfmt's ${VAR-} normalization in the env-scan regex&#xD;
+- Trunk fmt docs + shellcheck fixes; drop dead loop in contract test&#xD;
+- Black formatting on test files&#xD;
+- Nosec annotations for bandit in contract test&#xD;
+- Black reformat contract test&#xD;
+- Nosec B405 on the ET import&#xD;
+- Bandit nosec codes space-separated</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
