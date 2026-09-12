@@ -11,7 +11,7 @@ input), so defusedxml is unnecessary; noted to satisfy the lint rule.
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET  # nosec B405,B406,B314 # own repo file, no external entities
+import xml.etree.ElementTree as ET  # nosec B405 B406 B314  # own repo file, no external entities
 from pathlib import Path
 
 APP = Path(__file__).resolve().parent.parent
@@ -22,7 +22,7 @@ SERVICES = APP / "rootfs/etc/services.d"
 
 
 def xml_vars() -> dict[str, bool]:
-    tree = ET.parse(XML)  # nosec B406,B314 # own repo file, trusted source
+    tree = ET.parse(XML)  # nosec B406 B314  # own repo file, trusted source
     out: dict[str, bool] = {}
     for el in tree.iter("Config"):
         if el.get("Type") == "Variable":
@@ -53,7 +53,7 @@ def _s6_env_reads() -> set[str]:
 
 
 def test_required_xml_vars_have_no_default() -> None:
-    tree = ET.parse(XML)  # nosec B406,B314 # own repo file, trusted source
+    tree = ET.parse(XML)  # nosec B406 B314  # own repo file, trusted source
     for el in tree.iter("Config"):
         if el.get("Required") == "true" and el.get("Type") == "Variable":
             assert not (  # nosec B101 # test assertions
@@ -130,7 +130,7 @@ def test_every_xml_variable_target_is_consumed_by_chain() -> None:
 
 
 def test_only_key_required_providers_have_xml_key_fields() -> None:
-    tree = ET.parse(XML)  # nosec B406,B314 # own repo file, trusted source
+    tree = ET.parse(XML)  # nosec B406 B314  # own repo file, trusted source
     key_targets = {
         el.get("Target")
         for el in tree.iter("Config")
