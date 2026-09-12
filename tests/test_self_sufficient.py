@@ -66,8 +66,12 @@ def _rootfs_blob() -> str:
 def test_first_boot_uses_spec_init_and_schema() -> None:
     script = _first_boot()
     assert "gbrain init" in script  # nosec B101
-    assert '--embedding-model "${EMBEDDING_MODEL:-ollama:embeddinggemma}"' in script  # nosec B101
-    assert '--embedding-dimensions "${EMBEDDING_DIMENSIONS:-768}"' in script  # nosec B101
+    assert (
+        '--embedding-model "${EMBEDDING_MODEL:-ollama:embeddinggemma}"' in script
+    )  # nosec B101
+    assert (
+        '--embedding-dimensions "${EMBEDDING_DIMENSIONS:-768}"' in script
+    )  # nosec B101
     assert "--non-interactive" in script  # nosec B101
     assert "--skip-embed-check" in script  # nosec B101
     assert "git init" in script  # nosec B101

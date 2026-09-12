@@ -54,7 +54,9 @@ def test_required_xml_vars_have_no_default() -> None:
     tree = ET.parse(XML)  # nosec B406 # own repo file, trusted source
     for el in tree.iter("Config"):
         if el.get("Required") == "true" and el.get("Type") == "Variable":
-            assert not (el.text or "").strip(), f"required var {el.get('Target')} must have empty default"
+            assert not (
+                el.text or ""
+            ).strip(), f"required var {el.get('Target')} must have empty default"
 
 
 def test_bootstrap_required_vars_exposed_in_xml() -> None:
@@ -71,19 +73,31 @@ def test_no_homelab_ip_defaults_in_rootfs() -> None:
 
 def test_every_xml_variable_target_is_consumed_by_chain() -> None:
     chain_reads = set(_bootstrap_env_reads())
-    chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", (LIB.read_text())))
+    chain_reads |= set(
+        re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", (LIB.read_text()))
+    )
     for run in SERVICES.rglob("run"):
-        chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", run.read_text()))
+        chain_reads |= set(
+            re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", run.read_text())
+        )
     consumed_by_first_boot = set(
-        re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", (APP / "rootfs/usr/local/bin/gbrain-first-boot").read_text())
+        re.findall(
+            r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}",
+            (APP / "rootfs/usr/local/bin/gbrain-first-boot").read_text(),
+        )
     )
     consumed_by_merge = set(
-        re.findall(r"process\.env\.([A-Z][A-Z0-9_]+)", (APP / "rootfs/usr/local/bin/gbrain-merge-file-config").read_text())
+        re.findall(
+            r"process\.env\.([A-Z][A-Z0-9_]+)",
+            (APP / "rootfs/usr/local/bin/gbrain-merge-file-config").read_text(),
+        )
     )
     # Every other helper under rootfs/usr/local/bin (dream-once, doctor-once,
     # push-after-cycle, ...) also consumes XML-triggered vars.
     for helper in (APP / "rootfs/usr/local/bin").iterdir():
-        consumed_by_merge |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", helper.read_text()))
+        consumed_by_merge |= set(
+            re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", helper.read_text())
+        )
     # Vars the gbrain runtime itself consumes via container env passthrough
     # (sourced by with-contenv, never by a setup script).
     runtime_consumed = {
@@ -110,12 +124,21 @@ def test_every_xml_variable_target_is_consumed_by_chain() -> None:
 def test_only_key_required_providers_have_xml_key_fields() -> None:
     tree = ET.parse(XML)  # nosec B406 # own repo file, trusted source
     key_targets = {
-        el.get("Target") for el in tree.iter("Config")
+        el.get("Target")
+        for el in tree.iter("Config")
         if el.get("Type") == "Variable" and "API_KEY" in (el.get("Target") or "")
     }
     assert "OLLAMA_API_KEY" not in key_targets, "ollama needs no key; do not expose"
     assert "TOGETHER_API_KEY" not in key_targets, "together key is script-managed"
-    expected = {"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY", "VOYAGE_API_KEY"}
+    expected = {
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "GEMINI_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "GROQ_API_KEY",
+        "OPENROUTER_API_KEY",
+        "VOYAGE_API_KEY",
+    }
     assert key_targets == expected, f"key fields mismatch: {key_targets ^ expected}"
 
 
@@ -137,7 +160,9 @@ def test_runtime_env_heredoc_matches_xml_surface() -> None:
         "TS_DERIVED_IP",
     }
     for key in runtime_keys:
-        assert key in xml_targets or key in internal, f"runtime.env key {key} has no XML trigger"
+        assert (
+            key in xml_targets or key in internal
+        ), f"runtime.env key {key} has no XML trigger"
 
 
 def test_merge_file_config_reads_all_xml_model_vars() -> None:
@@ -161,6 +186,7 @@ def test_s6_scripts_read_schedule_vars() -> None:
     assert "doctor_day" in doctor and "doctor_at" in doctor
     assert "AUTOPILOT_INTERVAL" in autopilot
 
+
 def test_first_boot_marks_doctor_and_backfill() -> None:
     s = (APP / "rootfs/usr/local/bin/gbrain-first-boot").read_text()
     assert "need-first-doctor" in s
@@ -171,7 +197,7 @@ def test_graph_backfill_is_idempotent_and_source_scoped() -> None:
     s = (APP / "rootfs/usr/local/bin/gbrain-graph-backfill").read_text()
     assert "extract links --source db --source-id" in s
     assert "extract timeline --source db --source-id" in s
-    assert 'graph-backfill.done' in s
+    assert "graph-backfill.done" in s
 
 
 def test_post_helper_waits_for_first_sync_job() -> None:

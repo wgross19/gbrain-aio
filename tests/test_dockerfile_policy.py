@@ -113,7 +113,10 @@ def test_postgres_password_is_required_and_alphanumeric() -> None:
 
 def test_cert_is_reused_when_present() -> None:
     tls = _caddy_tls()
-    assert "TLS cert covers all required SAN entries" in tls or "TLS cert already present" in tls  # nosec B101
+    assert (
+        "TLS cert covers all required SAN entries" in tls
+        or "TLS cert already present" in tls
+    )  # nosec B101
     assert "cert.pem" in tls and "key.pem" in tls  # nosec B101
 
 
