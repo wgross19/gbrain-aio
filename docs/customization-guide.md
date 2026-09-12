@@ -4,7 +4,7 @@ How to adapt gbrain-aio without touching the image. The Unraid XML is the trigge
 
 ## The trigger model
 
-```
+```text
 XML <Config>  →  container env  →  01-bootstrap.sh  →  runtime.env
                                         │
                                         ├─→ gbrain-merge-file-config → config.json (file plane)
@@ -17,49 +17,49 @@ Precedence: explicit XML/env value > existing brain `config.json` > script defau
 
 ### Required (no defaults — install fails without them)
 
-| Field | Why |
-| --- | --- |
-| `POSTGRES_PASSWORD` | Alphanumeric secret |
-| `GBRAIN_LAN_BIND` | Unraid LAN IP. Feeds the TLS cert SAN and derives the public origin |
-| `GBRAIN_ADMIN_BOOTSTRAP_TOKEN` | First `/admin` login, 32+ chars |
+| Field                          | Why                                                                 |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `POSTGRES_PASSWORD`            | Alphanumeric secret                                                 |
+| `GBRAIN_LAN_BIND`              | Unraid LAN IP. Feeds the TLS cert SAN and derives the public origin |
+| `GBRAIN_ADMIN_BOOTSTRAP_TOKEN` | First `/admin` login, 32+ chars                                     |
 
 ### Paths + port (always visible)
 
-| Path | Default |
-| --- | --- |
-| Postgres Data | `/mnt/user/appdata/gbrain-aio/data/postgres` |
-| GBrain Home | `/mnt/user/appdata/gbrain-aio/gbrain-home` |
-| Caddy Certs | `/mnt/user/appdata/gbrain-aio/caddy` |
-| Brain Path | `/mnt/user/my-brain` — must equal the share you create |
-| Web UI Port | `3132` (HTTPS via Caddy; the only published port) |
+| Path          | Default                                                |
+| ------------- | ------------------------------------------------------ |
+| Postgres Data | `/mnt/user/appdata/gbrain-aio/data/postgres`           |
+| GBrain Home   | `/mnt/user/appdata/gbrain-aio/gbrain-home`             |
+| Caddy Certs   | `/mnt/user/appdata/gbrain-aio/caddy`                   |
+| Brain Path    | `/mnt/user/my-brain` — must equal the share you create |
+| Web UI Port   | `3132` (HTTPS via Caddy; the only published port)      |
 
 `SOURCE_NAME` (default `my-brain`) **must equal the basename of Brain Path**. It names the gbrain source and the in-container mount `/<SOURCE_NAME>`.
 
 ### Models (advanced, empty = proven keyless defaults)
 
-| Field | Empty → | Set → |
-| --- | --- | --- |
-| `EMBEDDING_MODEL` | `ollama:embeddinggemma` | any `provider:model` supported by `gbrain init` |
-| `EMBEDDING_DIMENSIONS` | `768` | must match the model's native width |
-| `SCHEMA_PACK` | `gbrain-everything` | any schema pack id |
-| `CHAT_PROVIDER` | `ollama` when Ollama Base URL is set | `together` = legacy redirect mode |
-| `CHAT_MODEL` | `deepseek-v4-flash:cloud` | any model your Ollama serves |
-| `OLLAMA_BASE_URL` | local Ollama off (keyword search only) | e.g. `http://<host>:11434/v1` |
+| Field                  | Empty →                                | Set →                                           |
+| ---------------------- | -------------------------------------- | ----------------------------------------------- |
+| `EMBEDDING_MODEL`      | `ollama:embeddinggemma`                | any `provider:model` supported by `gbrain init` |
+| `EMBEDDING_DIMENSIONS` | `768`                                  | must match the model's native width             |
+| `SCHEMA_PACK`          | `gbrain-everything`                    | any schema pack id                              |
+| `CHAT_PROVIDER`        | `ollama` when Ollama Base URL is set   | `together` = legacy redirect mode               |
+| `CHAT_MODEL`           | `deepseek-v4-flash:cloud`              | any model your Ollama serves                    |
+| `OLLAMA_BASE_URL`      | local Ollama off (keyword search only) | e.g. `http://<host>:11434/v1`                   |
 
 ### Schedules (advanced, empty = baked defaults)
 
-| Field | Empty → |
-| --- | --- |
-| `AUTOPILOT_INTERVAL` | 1800 seconds (upstream default is 300; ours is 1800) |
-| `DREAM_AT` | 02:00 local |
-| `DOCTOR_DAY` / `DOCTOR_AT` | monday / 06:00 |
+| Field                      | Empty →                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `AUTOPILOT_INTERVAL`       | 1800 seconds (upstream default is 300; ours is 1800) |
+| `DREAM_AT`                 | 02:00 local                                          |
+| `DOCTOR_DAY` / `DOCTOR_AT` | monday / 06:00                                       |
 
 ### Origin, TLS, Tailscale (advanced)
 
-| Field | Empty → |
-| --- | --- |
-| `GBRAIN_PUBLIC_URL` | `https://<LAN_BIND>:3132` (derived) |
-| `TS_PUBLIC_URL` | `auto` when per-container Tailscale is enabled |
+| Field                               | Empty →                                        |
+| ----------------------------------- | ---------------------------------------------- |
+| `GBRAIN_PUBLIC_URL`                 | `https://<LAN_BIND>:3132` (derived)            |
+| `TS_PUBLIC_URL`                     | `auto` when per-container Tailscale is enabled |
 | `CERT_EXTRA_DNS` / `CERT_EXTRA_IPS` | base SAN only (+ auto-derived tailnet entries) |
 
 Single-origin rule: one input (`GBRAIN_LAN_BIND`) drives both the cert identity and the OAuth origin. Override `GBRAIN_PUBLIC_URL` only for a custom port, DNS name, reverse proxy, or Tailscale origin.

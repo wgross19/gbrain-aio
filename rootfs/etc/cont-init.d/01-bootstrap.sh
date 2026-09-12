@@ -28,7 +28,10 @@ if [[ -z ${POSTGRES_PASSWORD-} ]]; then
 	exit 64
 fi
 case "${POSTGRES_PASSWORD}" in
-*[!A-Za-z0-9]*) log "error: POSTGRES_PASSWORD must be alphanumeric (A-Za-z0-9)"; exit 64 ;;
+*[!A-Za-z0-9]*)
+	log "error: POSTGRES_PASSWORD must be alphanumeric (A-Za-z0-9)"
+	exit 64
+	;;
 esac
 
 ENCODED_URL="$(
@@ -52,13 +55,13 @@ case "${GBRAIN_LAN_BIND}" in
 	exit 64
 	;;
 esac
-PUBLIC_URL="${GBRAIN_PUBLIC_URL:-}"
+PUBLIC_URL="${GBRAIN_PUBLIC_URL-}"
 if [[ -z ${PUBLIC_URL} ]]; then
 	# Tailnet auto-derivation (TS_PUBLIC_URL=auto|off|<url>):
 	#   auto (default when a tailscaled socket exists): use the MagicDNS name.
 	#   off: keep the LAN origin. <url>: explicit origin wins.
 	TS_SOCKET="${TS_SOCKET:-/var/run/tailscale/tailscaled.sock}"
-	TS_POLICY="${TS_PUBLIC_URL:-}"
+	TS_POLICY="${TS_PUBLIC_URL-}"
 	if [[ -S ${TS_SOCKET} ]]; then
 		TS_POLICY="${TS_POLICY:-auto}"
 	fi
@@ -71,7 +74,7 @@ if [[ -z ${PUBLIC_URL} ]]; then
 			[[ -n ${TS_NAME} ]] && break
 			sleep 1
 		done
-		TS_IP="$(printf '%s' "${TS_JSON:-}" | sed -n 's/.*"TailscaleIPs": *\[\s*"\([^"]*\)".*/\1/p' | head -1 || true)"
+		TS_IP="$(printf '%s' "${TS_JSON-}" | sed -n 's/.*"TailscaleIPs": *\[\s*"\([^"]*\)".*/\1/p' | head -1 || true)"
 		if [[ -n ${TS_NAME} ]]; then
 			PUBLIC_URL="https://${TS_NAME}:${GBRAIN_HTTP_PORT:-3132}"
 			log "tailscale detected; public URL derived from MagicDNS name"
@@ -83,8 +86,8 @@ if [[ -z ${PUBLIC_URL} ]]; then
 		PUBLIC_URL="https://${GBRAIN_LAN_BIND}:${GBRAIN_HTTP_PORT:-3132}"
 	fi
 fi
-export TS_DERIVED_DNS_NAME="${TS_NAME:-}"
-export TS_DERIVED_IP="${TS_IP:-}"
+export TS_DERIVED_DNS_NAME="${TS_NAME-}"
+export TS_DERIVED_IP="${TS_IP-}"
 
 TOGETHER_KEY="${TOGETHER_API_KEY-}"
 if [[ -n ${OLLAMA_BASE_URL-} && -z ${TOGETHER_KEY} ]]; then
@@ -101,25 +104,25 @@ GBRAIN_HOME=/var/lib/gbrain
 GBRAIN_HTTP_PORT=${GBRAIN_HTTP_PORT:-3131}
 GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
 GBRAIN_LAN_BIND=${GBRAIN_LAN_BIND}
-OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
+OLLAMA_API_KEY=${OLLAMA_API_KEY-}
 GBRAIN_PUBLIC_URL=${PUBLIC_URL}
 SOURCE_NAME=${SOURCE_NAME}
-CHAT_PROVIDER=${CHAT_PROVIDER:-}
+CHAT_PROVIDER=${CHAT_PROVIDER-}
 CHAT_MODEL=${CHAT_MODEL:-deepseek-v4-flash:cloud}
 TOGETHER_API_KEY=${TOGETHER_KEY}
-EMBEDDING_MODEL=${EMBEDDING_MODEL:-}
-EMBEDDING_DIMENSIONS=${EMBEDDING_DIMENSIONS:-}
-SCHEMA_PACK=${SCHEMA_PACK:-}
+EMBEDDING_MODEL=${EMBEDDING_MODEL-}
+EMBEDDING_DIMENSIONS=${EMBEDDING_DIMENSIONS-}
+SCHEMA_PACK=${SCHEMA_PACK-}
 AUTOPILOT_INTERVAL=${AUTOPILOT_INTERVAL:-1800}
 DREAM_AT=${DREAM_AT:-02:00}
 DOCTOR_DAY=${DOCTOR_DAY:-monday}
 DOCTOR_AT=${DOCTOR_AT:-06:00}
 TS_SOCKET=${TS_SOCKET:-/var/run/tailscale/tailscaled.sock}
-TS_DERIVED_DNS_NAME=${TS_DERIVED_DNS_NAME:-}
-TS_DERIVED_IP=${TS_DERIVED_IP:-}
-CERT_EXTRA_DNS=${CERT_EXTRA_DNS:-}
-CERT_EXTRA_IPS=${CERT_EXTRA_IPS:-}
-GBRAIN_EXTRA_CONFIG=${GBRAIN_EXTRA_CONFIG:-}
+TS_DERIVED_DNS_NAME=${TS_DERIVED_DNS_NAME-}
+TS_DERIVED_IP=${TS_DERIVED_IP-}
+CERT_EXTRA_DNS=${CERT_EXTRA_DNS-}
+CERT_EXTRA_IPS=${CERT_EXTRA_IPS-}
+GBRAIN_EXTRA_CONFIG=${GBRAIN_EXTRA_CONFIG-}
 EOF
 chown gbrain:users /var/lib/gbrain/runtime.env
 chmod 600 /var/lib/gbrain/runtime.env

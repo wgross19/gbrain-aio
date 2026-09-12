@@ -115,17 +115,6 @@ def test_only_key_required_providers_have_xml_key_fields() -> None:
     }
     assert "OLLAMA_API_KEY" not in key_targets, "ollama needs no key; do not expose"
     assert "TOGETHER_API_KEY" not in key_targets, "together key is script-managed"
-    for required_key in (
-        "ANTHROPIC_API_KEY",
-        "OPENAI_API_KEY",
-        "OPENROUTER_API_KEY",
-        "GEMINI_API_KEY",
-        "DEEPSEEK_API_KEY",
-        "GROQ_API_KEY",
-        "OPENROUTER_API_KEY",
-        "VOYAGE_API_KEY",
-    ):
-        assert key_targets >= {f"{k}" for k in [f"{key_targets}"][:0]} or True
     expected = {"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY", "VOYAGE_API_KEY"}
     assert key_targets == expected, f"key fields mismatch: {key_targets ^ expected}"
 

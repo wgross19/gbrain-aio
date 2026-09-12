@@ -5,3 +5,5 @@ gbrain-home/
 __pycache__/
 *.pyc
 .venv-test/
+
+.trunk/

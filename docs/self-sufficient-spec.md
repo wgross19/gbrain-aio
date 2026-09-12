@@ -23,13 +23,13 @@ Precedence: explicit env (XML) > existing `config.json` values on existing brain
 
 ## In-container schedule
 
-| Job             | When                                   | Command / process                                                                |
-| --------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
-| Jobs supervisor | always                                 | existing `gbrain-worker` (`gbrain jobs supervisor --nice`)                       |
-| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s) | s6 longrun: `gbrain autopilot --repo /${SOURCE_NAME} --no-worker`            |
-| Dream           | nightly at `DREAM_AT` (default 02:00)  | `gbrain dream --dir /${SOURCE_NAME}` (wait on cycle lock)                        |
+| Job             | When                                                      | Command / process                                                                |
+| --------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Jobs supervisor | always                                                    | existing `gbrain-worker` (`gbrain jobs supervisor --nice`)                       |
+| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s)                | s6 longrun: `gbrain autopilot --repo /${SOURCE_NAME} --no-worker`                |
+| Dream           | nightly at `DREAM_AT` (default 02:00)                     | `gbrain dream --dir /${SOURCE_NAME}` (wait on cycle lock)                        |
 | Doctor          | weekly on `DOCTOR_DAY` at `DOCTOR_AT` (default Mon 06:00) | `gbrain doctor --json` → `~/.gbrain/last-doctor.json`; remediate only if cap set |
-| Git push        | after a **successful autopilot-cycle** | only if `BRAIN_GIT_PUSH_URL` is set                                              |
+| Git push        | after a **successful autopilot-cycle**                    | only if `BRAIN_GIT_PUSH_URL` is set                                              |
 
 Autopilot interval defaults to 30 minutes (upstream's default is 5 minutes — a documented deviation, now overridable). Dream and doctor defaults match the official gbrain cron guide. Dream waits if an autopilot-cycle holds the lock.
 
@@ -128,13 +128,13 @@ Per-container Tailscale (Unraid 7 toggle): when a tailscaled socket exists, boot
 
 ### On if a chat model exists
 
-| Flag | When | Why |
-| --- | --- | --- |
-| `dream.drift.enabled` | nightly dream | Stale-take judge |
-| `cycle.enrich_thin.enabled` | nightly dream | Person/company stubs |
-| `cycle.conversation_facts_backfill.enabled` | nightly dream | Facts from conversation pages |
-| `conversation_parser.llm_fallback_enabled` | always when chat exists | Regex first; LLM if parse is weak |
-| `cycle.grade_takes.auto_resolve.enabled` | nightly grade | Auto-apply high-confidence verdicts |
+| Flag                                        | When                    | Why                                 |
+| ------------------------------------------- | ----------------------- | ----------------------------------- |
+| `dream.drift.enabled`                       | nightly dream           | Stale-take judge                    |
+| `cycle.enrich_thin.enabled`                 | nightly dream           | Person/company stubs                |
+| `cycle.conversation_facts_backfill.enabled` | nightly dream           | Facts from conversation pages       |
+| `conversation_parser.llm_fallback_enabled`  | always when chat exists | Regex first; LLM if parse is weak   |
+| `cycle.grade_takes.auto_resolve.enabled`    | nightly grade           | Auto-apply high-confidence verdicts |
 
 ### Always on
 
@@ -143,11 +143,11 @@ Per-container Tailscale (Unraid 7 toggle): when a tailscaled socket exists, boot
 
 ### Template toggle, default off
 
-| Env / field | Flag |
-| --- | --- |
-| `SKILLOPT_ENABLED` | `cycle.skillopt.enabled` |
-| `NIGHTLY_QUALITY_PROBE` | `autopilot.nightly_quality_probe.enabled` |
-| `PARSER_PROBE_ENABLED` | `autopilot.conversation_parser_probe.enabled` |
+| Env / field             | Flag                                          |
+| ----------------------- | --------------------------------------------- |
+| `SKILLOPT_ENABLED`      | `cycle.skillopt.enabled`                      |
+| `NIGHTLY_QUALITY_PROBE` | `autopilot.nightly_quality_probe.enabled`     |
+| `PARSER_PROBE_ENABLED`  | `autopilot.conversation_parser_probe.enabled` |
 
 ### Stay off
 
@@ -158,11 +158,11 @@ Per-container Tailscale (Unraid 7 toggle): when a tailscaled socket exists, boot
 
 ## Out of the default container
 
-| Item | Why | Later hook |
-| --- | --- | --- |
-| Session synthesize corpus | Needs a `.txt` exporter | Mount corpus dir; set `dream.synthesize.session_corpus_dir` via Extra Config. Never mount agent JSONL |
-| Gmail / X / Readwise runners | Image has the recipe only | External collectors write into the brain |
-| Live Cortex backup | Not this container's job | Optional push is the **mounted** brain only |
+| Item                         | Why                       | Later hook                                                                                            |
+| ---------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Session synthesize corpus    | Needs a `.txt` exporter   | Mount corpus dir; set `dream.synthesize.session_corpus_dir` via Extra Config. Never mount agent JSONL |
+| Gmail / X / Readwise runners | Image has the recipe only | External collectors write into the brain                                                              |
+| Live Cortex backup           | Not this container's job  | Optional push is the **mounted** brain only                                                           |
 
 ## Template fields (trigger surface)
 

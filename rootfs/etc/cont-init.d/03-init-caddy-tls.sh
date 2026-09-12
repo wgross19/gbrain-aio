@@ -1,5 +1,6 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
+# shellcheck disable=SC2312  # intentional: log() masks the SAN capture return
 # Mint the self-signed TLS cert. Idempotent: re-mints only when the existing
 # cert's SAN does not yet cover the required entries (LAN IP, extras, tailnet).
 set -euo pipefail
@@ -17,7 +18,7 @@ if [[ -f /var/lib/gbrain/runtime.env ]]; then
 	set +a
 fi
 
-SAN_IP="${GBRAIN_LAN_BIND:-}"
+SAN_IP="${GBRAIN_LAN_BIND-}"
 if [[ -z ${SAN_IP} ]]; then
 	log "error: GBRAIN_LAN_BIND is required to mint the TLS cert"
 	exit 64
@@ -28,15 +29,15 @@ fi
 # MagicDNS name + 100.x IP automatically and adds them here; these vars are
 # the manual fallback.
 EXTRA_PARTS=""
-for dns in $(printf '%s' "${CERT_EXTRA_DNS:-}" | tr ',' ' '); do
+for dns in $(printf '%s' "${CERT_EXTRA_DNS-}" | tr ',' ' '); do
 	[[ -n ${dns} ]] && EXTRA_PARTS="${EXTRA_PARTS},DNS:${dns}"
 done
-for ip in $(printf '%s' "${CERT_EXTRA_IPS:-}" | tr ',' ' '); do
+for ip in $(printf '%s' "${CERT_EXTRA_IPS-}" | tr ',' ' '); do
 	[[ -n ${ip} ]] && EXTRA_PARTS="${EXTRA_PARTS},IP:${ip}"
 done
 # The tailnet MagicDNS name + IP bootstrap discovered this boot.
-TS_NAME="${TS_DERIVED_DNS_NAME:-}"
-TS_IP="${TS_DERIVED_IP:-}"
+TS_NAME="${TS_DERIVED_DNS_NAME-}"
+TS_IP="${TS_DERIVED_IP-}"
 if [[ -n ${TS_NAME} ]]; then
 	EXTRA_PARTS="${EXTRA_PARTS},DNS:${TS_NAME}"
 fi
@@ -48,19 +49,22 @@ needs_mint() {
 	[[ ! -s "${CERT_DIR}/cert.pem" || ! -s "${CERT_DIR}/key.pem" ]] && return 0
 	local san
 	# Normalize: 'IP Address:x' renders as 'IPAddress:x' after whitespace strip.
-	san="$(openssl x509 -in "${CERT_DIR}/cert.pem" -noout -text 2>/dev/null \
-		| tr -d ' ' | grep -iE 'IPAddress|DNS:' | tr '\n' ' ' || true)"
+	san="$(openssl x509 -in "${CERT_DIR}/cert.pem" -noout -text 2>/dev/null |
+		tr -d ' ' | grep -iE 'IPAddress|DNS:' | tr '\n' ' ' || true)"
 	[[ -n ${SAN_IP} && ${san} != *"IPAddress:${SAN_IP}"* ]] && return 0
-	for dns in $(printf '%s' "${CERT_EXTRA_DNS:-}" | tr ',' ' '); do
+	for dns in $(printf '%s' "${CERT_EXTRA_DNS-}" | tr ',' ' '); do
 		[[ -n ${dns} ]] && [[ ${san} != *"DNS:${dns}"* ]] && return 0
 	done
-	for ip in $(printf '%s' "${CERT_EXTRA_IPS:-}" | tr ',' ' '); do
+	for ip in $(printf '%s' "${CERT_EXTRA_IPS-}" | tr ',' ' '); do
 		[[ -n ${ip} ]] && [[ ${san} != *"IPAddress:${ip}"* ]] && return 0
 	done
 	return 1
 }
 
-if ! needs_mint; then
+NEEDS_MINT=0
+# shellcheck disable=SC2310  # intentional: capture predicate exit code without set -e abort
+needs_mint || NEEDS_MINT=$?
+if [[ ${NEEDS_MINT} -ne 0 ]]; then
 	log "TLS cert covers all required SAN entries"
 	exit 0
 fi
