@@ -47,14 +47,15 @@ fi
 needs_mint() {
 	[[ ! -s "${CERT_DIR}/cert.pem" || ! -s "${CERT_DIR}/key.pem" ]] && return 0
 	local san
-	san="$(openssl x509 -in "${CERT_DIR}/cert.pem" -noout -text 2>/dev/null | tr -d ' ' | grep -i 'IPAddress\|DNS:' | tr '\n' ' ' || true)"
-	# The base entries must exist; extras are added on mint when present.
-	if [[ -n ${SAN_IP} && ${san} != *IP:${SAN_IP}* ]]; then return 0; fi
+	# Normalize: 'IP Address:x' renders as 'IPAddress:x' after whitespace strip.
+	san="$(openssl x509 -in "${CERT_DIR}/cert.pem" -noout -text 2>/dev/null \
+		| tr -d ' ' | grep -iE 'IPAddress|DNS:' | tr '\n' ' ' || true)"
+	[[ -n ${SAN_IP} && ${san} != *"IPAddress:${SAN_IP}"* ]] && return 0
 	for dns in $(printf '%s' "${CERT_EXTRA_DNS:-}" | tr ',' ' '); do
-		[[ -n ${dns} ]] && [[ ${san} != *DNS:${dns}* ]] && return 0
+		[[ -n ${dns} ]] && [[ ${san} != *"DNS:${dns}"* ]] && return 0
 	done
 	for ip in $(printf '%s' "${CERT_EXTRA_IPS:-}" | tr ',' ' '); do
-		[[ -n ${ip} ]] && [[ ${san} != *IP:${ip}* ]] && return 0
+		[[ -n ${ip} ]] && [[ ${san} != *"IPAddress:${ip}"* ]] && return 0
 	done
 	return 1
 }
