@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.1 - 2026-09-12
+
+### Documentation
+
+- Rewrite README for readability and published-app polish
+
+- Make CA Overview concise (1-line pitch + high-level setup)
+
+- Rewrite spec + customization guide for the trigger model
+
+### Features
+
+- Universal XML-triggered setup + bake v0.50.0.0 prerequisites
+
+### Maintenance
+
+- Bump gbrain to v0.48.2.0 (#34)
+
+- Bump gbrain to v0.48.5.0 (#38)
+
+- Bump gbrain to v0.50.0.0 (#39)
+
+### Tests
+
+- Assert no Hermes wiring in XML, not the bare word
+
 ## v0.46.23.0-aio.1 - 2026-08-20
 
 ### Features
