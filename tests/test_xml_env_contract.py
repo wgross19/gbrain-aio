@@ -32,7 +32,7 @@ def xml_vars() -> dict[str, bool]:
 
 def _bootstrap_env_reads() -> set[str]:
     s = BOOTSTRAP.read_text()
-    return set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", s))
+    return set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", s))
 
 
 def _runtime_env_keys() -> set[str]:
@@ -46,7 +46,7 @@ def _s6_env_reads() -> set[str]:
     reads: set[str] = set()
     for run in SERVICES.rglob("run"):
         s = run.read_text()
-        reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", s))
+        reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", s))
     return reads
 
 
@@ -71,11 +71,11 @@ def test_no_homelab_ip_defaults_in_rootfs() -> None:
 
 def test_every_xml_variable_target_is_consumed_by_chain() -> None:
     chain_reads = set(_bootstrap_env_reads())
-    chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", (LIB.read_text())))
+    chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", (LIB.read_text())))
     for run in SERVICES.rglob("run"):
-        chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", run.read_text()))
+        chain_reads |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", run.read_text()))
     consumed_by_first_boot = set(
-        re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", (APP / "rootfs/usr/local/bin/gbrain-first-boot").read_text())
+        re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", (APP / "rootfs/usr/local/bin/gbrain-first-boot").read_text())
     )
     consumed_by_merge = set(
         re.findall(r"process\.env\.([A-Z][A-Z0-9_]+)", (APP / "rootfs/usr/local/bin/gbrain-merge-file-config").read_text())
@@ -83,7 +83,7 @@ def test_every_xml_variable_target_is_consumed_by_chain() -> None:
     # Every other helper under rootfs/usr/local/bin (dream-once, doctor-once,
     # push-after-cycle, ...) also consumes XML-triggered vars.
     for helper in (APP / "rootfs/usr/local/bin").iterdir():
-        consumed_by_merge |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?\}", helper.read_text()))
+        consumed_by_merge |= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+)(?::-[^}]*)?-?\}", helper.read_text()))
     # Vars the gbrain runtime itself consumes via container env passthrough
     # (sourced by with-contenv, never by a setup script).
     runtime_consumed = {
