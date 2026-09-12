@@ -11,7 +11,7 @@ input), so defusedxml is unnecessary; noted to satisfy the lint rule.
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET  # nosec B406 # own repo file, no external entities
+import xml.etree.ElementTree as ET  # nosec B405,B406,B314 # own repo file, no external entities
 from pathlib import Path
 
 APP = Path(__file__).resolve().parent.parent
