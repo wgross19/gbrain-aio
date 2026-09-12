@@ -4,7 +4,9 @@ ARG BUN_IMAGE=oven/bun:${BUN_VERSION}
 ARG CADDY_VERSION=2.10.2
 ARG CADDY_DIGEST=sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83
 ARG CADDY_IMAGE=caddy:${CADDY_VERSION}-alpine
-ARG DEBIAN_IMAGE=debian:bookworm-slim@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143
+# Multi-arch index (amd64+arm64v8): the old single-arch amd64 digest broke the
+# arm64 build under qemu (bun arm64 binary vs amd64 debian userspace).
+ARG DEBIAN_IMAGE=debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
 ARG S6_OVERLAY_VERSION=3.2.1.0
 
 #checkov:skip=CKV_DOCKER_7:base images are digest-pinned, not 'latest'
