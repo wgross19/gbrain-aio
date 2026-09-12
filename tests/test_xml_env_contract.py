@@ -38,7 +38,9 @@ def _bootstrap_env_reads() -> set[str]:
 def _runtime_env_keys() -> set[str]:
     s = BOOTSTRAP.read_text()
     m = re.search(r"cat >/var/lib/gbrain/runtime\.env <<EOF\n(.*?)\nEOF\n", s, re.S)
-    assert m, "runtime.env heredoc not found in bootstrap"  # nosec B101 # test assertions
+    assert (
+        m
+    ), "runtime.env heredoc not found in bootstrap"  # nosec B101 # test assertions
     return set(re.findall(r"^([A-Z][A-Z0-9_]*)=", m.group(1), re.M))
 
 
@@ -62,13 +64,17 @@ def test_required_xml_vars_have_no_default() -> None:
 def test_bootstrap_required_vars_exposed_in_xml() -> None:
     xml_targets = set(xml_vars())
     for var in ("POSTGRES_PASSWORD", "GBRAIN_LAN_BIND", "GBRAIN_ADMIN_BOOTSTRAP_TOKEN"):
-        assert var in xml_targets, f"{var} must be settable from the XML"  # nosec B101 # test assertions
+        assert (
+            var in xml_targets
+        ), f"{var} must be settable from the XML"  # nosec B101 # test assertions
 
 
 def test_no_homelab_ip_defaults_in_rootfs() -> None:
     for path in [BOOTSTRAP, *SERVICES.rglob("run"), LIB]:
         s = path.read_text()
-        assert "192.168.1." not in s, f"homelab IP default leaked into {path}"  # nosec B101 # test assertions
+        assert (
+            "192.168.1." not in s
+        ), f"homelab IP default leaked into {path}"  # nosec B101 # test assertions
 
 
 def test_every_xml_variable_target_is_consumed_by_chain() -> None:
@@ -118,7 +124,9 @@ def test_every_xml_variable_target_is_consumed_by_chain() -> None:
 
     known = chain_reads | consumed_by_first_boot | consumed_by_merge | runtime_consumed
     for target, _required in xml_vars().items():
-        assert target in known, f"XML var {target} is not consumed by any setup script"  # nosec B101 # test assertions
+        assert (
+            target in known
+        ), f"XML var {target} is not consumed by any setup script"  # nosec B101 # test assertions
 
 
 def test_only_key_required_providers_have_xml_key_fields() -> None:
@@ -128,8 +136,12 @@ def test_only_key_required_providers_have_xml_key_fields() -> None:
         for el in tree.iter("Config")
         if el.get("Type") == "Variable" and "API_KEY" in (el.get("Target") or "")
     }
-    assert "OLLAMA_API_KEY" not in key_targets, "ollama needs no key; do not expose"  # nosec B101 # test assertions
-    assert "TOGETHER_API_KEY" not in key_targets, "together key is script-managed"  # nosec B101 # test assertions
+    assert (
+        "OLLAMA_API_KEY" not in key_targets
+    ), "ollama needs no key; do not expose"  # nosec B101 # test assertions
+    assert (
+        "TOGETHER_API_KEY" not in key_targets
+    ), "together key is script-managed"  # nosec B101 # test assertions
     expected = {
         "ANTHROPIC_API_KEY",
         "OPENAI_API_KEY",
@@ -139,7 +151,9 @@ def test_only_key_required_providers_have_xml_key_fields() -> None:
         "OPENROUTER_API_KEY",
         "VOYAGE_API_KEY",
     }
-    assert key_targets == expected, f"key fields mismatch: {key_targets ^ expected}"  # nosec B101 # test assertions
+    assert (
+        key_targets == expected
+    ), f"key fields mismatch: {key_targets ^ expected}"  # nosec B101 # test assertions
 
 
 def test_runtime_env_heredoc_matches_xml_surface() -> None:
@@ -175,15 +189,21 @@ def test_merge_file_config_reads_all_xml_model_vars() -> None:
         "SCHEMA_PACK",
         "GBRAIN_EXTRA_CONFIG",
     ):
-        assert f"process.env.{var}" in s, f"merge engine does not read {var}"  # nosec B101 # test assertions
+        assert (
+            f"process.env.{var}" in s
+        ), f"merge engine does not read {var}"  # nosec B101 # test assertions
 
 
 def test_s6_scripts_read_schedule_vars() -> None:
     dream = (SERVICES / "gbrain-dream/run").read_text()
     doctor = (SERVICES / "gbrain-doctor/run").read_text()
     autopilot = (SERVICES / "gbrain-autopilot/run").read_text()
-    assert "dream_at" in dream and "DREAM_AT" in (LIB.read_text())  # nosec B101 # test assertions
-    assert "doctor_day" in doctor and "doctor_at" in doctor  # nosec B101 # test assertions
+    assert "dream_at" in dream and "DREAM_AT" in (
+        LIB.read_text()
+    )  # nosec B101 # test assertions
+    assert (
+        "doctor_day" in doctor and "doctor_at" in doctor
+    )  # nosec B101 # test assertions
     assert "AUTOPILOT_INTERVAL" in autopilot  # nosec B101 # test assertions
 
 
@@ -196,7 +216,9 @@ def test_first_boot_marks_doctor_and_backfill() -> None:
 def test_graph_backfill_is_idempotent_and_source_scoped() -> None:
     s = (APP / "rootfs/usr/local/bin/gbrain-graph-backfill").read_text()
     assert "extract links --source db --source-id" in s  # nosec B101 # test assertions
-    assert "extract timeline --source db --source-id" in s  # nosec B101 # test assertions
+    assert (
+        "extract timeline --source db --source-id" in s
+    )  # nosec B101 # test assertions
     assert "graph-backfill.done" in s  # nosec B101 # test assertions
 
 
@@ -205,11 +227,15 @@ def test_post_helper_waits_for_first_sync_job() -> None:
     assert "jobs get" in s  # nosec B101 # test assertions
     assert "first-sync.job" in s  # nosec B101 # test assertions
     # backfill must come after the sync wait, not before
-    assert s.index("first-sync.job") < s.index("gbrain-graph-backfill")  # nosec B101 # test assertions
+    assert s.index("first-sync.job") < s.index(
+        "gbrain-graph-backfill"
+    )  # nosec B101 # test assertions
 
 
 def test_http_launches_post_helper_detached() -> None:
     s = (SERVICES / "gbrain-http/run").read_text()
     assert "gbrain-first-sync-post &" in s  # nosec B101 # test assertions
     # still must not block HTTP on indexing
-    assert s.index("gbrain serve --http") > s.index("gbrain-first-sync-post &")  # nosec B101 # test assertions
+    assert s.index("gbrain serve --http") > s.index(
+        "gbrain-first-sync-post &"
+    )  # nosec B101 # test assertions
