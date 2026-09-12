@@ -28,9 +28,14 @@ fi
 
 PARAMS="$(printf '{"sourceId":"%s"}' "${NAME}")"
 log "enqueue source-scoped sync for ${NAME}"
-gbrain_as gbrain jobs submit sync \
+JOB_ID="$(gbrain_as gbrain jobs submit sync \
   --params "${PARAMS}" \
-  --idempotency-key "first-boot-sync:${NAME}" || log "warn: sync enqueue failed"
+  --idempotency-key "first-boot-sync:${NAME}" 2>/dev/null | tail -1 || true)"
+if [ -n "${JOB_ID:-}" ]; then
+  printf '%s\n' "${JOB_ID}" > /var/lib/gbrain/.gbrain/first-sync.job
+  chown gbrain:users /var/lib/gbrain/.gbrain/first-sync.job || true
+  log "first sync job recorded: ${JOB_ID}"
+fi
 rm -f "${MARKER}"
 touch "${DONE}"
 chown gbrain:users "${DONE}" || true

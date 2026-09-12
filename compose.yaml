@@ -62,24 +62,42 @@ services:
       # GBrain HTTP listens on loopback inside the container. Caddy fronts it. (Fixed)
       GBRAIN_HTTP_PORT: "3131" # yamllint disable-line rule:quoted-strings
       GBRAIN_HTTP_BIND: "127.0.0.1" # yamllint disable-line rule:quoted-strings
-      # Public HTTPS origin clients use. Must match the published port. (Variable)
-      GBRAIN_PUBLIC_URL: ${GBRAIN_PUBLIC_URL:-https://192.168.1.50:3132}
+      # Public HTTPS origin clients use. Empty = derived from LAN Bind. (Variable)
+      GBRAIN_PUBLIC_URL: ${GBRAIN_PUBLIC_URL:-}
       # Admin bootstrap token for first /admin login. Alphanumeric. (Variable, secret)
       GBRAIN_ADMIN_BOOTSTRAP_TOKEN: ${GBRAIN_ADMIN_BOOTSTRAP_TOKEN:-}
-      # LAN IP the container binds for the published HTTPS port. (Variable)
-      GBRAIN_LAN_BIND: ${GBRAIN_LAN_BIND:-192.168.1.50}
+      # Unraid host LAN IP: the single required network input (cert SAN + origin).
+      GBRAIN_LAN_BIND: ${GBRAIN_LAN_BIND}
       # UID/GID for the brain repo bind mount (Unraid default 99:100). (Variable)
       BRAIN_UID: ${BRAIN_UID:-99}
       BRAIN_GID: ${BRAIN_GID:-100}
       # Name of the mounted brain source. Must equal basename(BRAIN_PATH). (Variable)
       SOURCE_NAME: ${SOURCE_NAME:-my-brain}
       # Ollama openai-compat endpoint for embeddings + chat. (Variable)
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://192.168.1.50:11434/v1}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
       OLLAMA_API_KEY: ${OLLAMA_API_KEY:-ollama}
-      # Together-compat key used to route chat/dream/think through Ollama /v1. (Variable)
-      TOGETHER_API_KEY: ${TOGETHER_API_KEY:-ollama}
+      # Together key: only needed in CHAT_PROVIDER=together legacy mode. (Variable)
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY:-}
+      # Chat provider: empty/ollama = raw ollama recipe; together = legacy redirect.
+      CHAT_PROVIDER: ${CHAT_PROVIDER:-}
       # Chat model name when OLLAMA_BASE_URL is set. (Variable)
       CHAT_MODEL: ${CHAT_MODEL:-deepseek-v4-flash:cloud}
+      # Embedding + schema overrides. Empty = proven keyless defaults. (Variable)
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-}
+      SCHEMA_PACK: ${SCHEMA_PACK:-}
+      # Schedules. Empty = baked defaults (1800s / 02:00 / Monday 06:00). (Variable)
+      AUTOPILOT_INTERVAL: ${AUTOPILOT_INTERVAL:-}
+      DREAM_AT: ${DREAM_AT:-}
+      DOCTOR_DAY: ${DOCTOR_DAY:-}
+      DOCTOR_AT: ${DOCTOR_AT:-}
+      # Tailscale origin policy: auto (default on integration) | off | URL. (Variable)
+      TS_PUBLIC_URL: ${TS_PUBLIC_URL:-}
+      # Extra TLS cert SAN entries (manual fallback; tailnet auto-derives). (Variable)
+      CERT_EXTRA_DNS: ${CERT_EXTRA_DNS:-}
+      CERT_EXTRA_IPS: ${CERT_EXTRA_IPS:-}
+      # Universal passthrough for ANY gbrain config key (key=value pairs). (Variable)
+      GBRAIN_EXTRA_CONFIG: ${GBRAIN_EXTRA_CONFIG:-}
       # Optional git push after a successful autopilot-cycle. Empty = off. (Variable)
       BRAIN_GIT_PUSH_URL: ${BRAIN_GIT_PUSH_URL:-}
       BRAIN_GIT_PUSH_TOKEN: ${BRAIN_GIT_PUSH_TOKEN:-}
@@ -89,6 +107,13 @@ services:
       SKILLOPT_ENABLED: ${SKILLOPT_ENABLED:-}
       NIGHTLY_QUALITY_PROBE: ${NIGHTLY_QUALITY_PROBE:-}
       PARSER_PROBE_ENABLED: ${PARSER_PROBE_ENABLED:-}
+      # Optional vendor keys, read by the gateway directly from env. (Variable)
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
 
     # --- Ports (Unraid: <Config ... Type="Port"/>) ---------------------------
     # Only 3132 is published. Two rows: loopback-only + LAN bind.
@@ -97,7 +122,7 @@ services:
     # NEVER add a 5432 row.
     ports:
       - "127.0.0.1:${GBRAIN_HOST_PORT:-3132}:3132"
-      - "${GBRAIN_LAN_BIND:-192.168.1.50}:${GBRAIN_HOST_PORT:-3132}:3132"
+      - "${GBRAIN_LAN_BIND}:${GBRAIN_HOST_PORT:-3132}:3132"
 
     # --- Volumes (Unraid: <Config ... Type="Path"/>) --------------------------
     # Each maps to one XML <Config> row. "Target" is the in-container path;
@@ -110,7 +135,7 @@ services:
       # Caddy certs + CA. Persistent so the phone trusts once. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/caddy:/config/caddy
       # The brain markdown repo. Host share -> container /<SOURCE_NAME>. (Path, rw)
-      - ${BRAIN_PATH:-/mnt/user/cortext-test}:/${SOURCE_NAME:-cortext-test}
+      - ${BRAIN_PATH:?set BRAIN_PATH to your Unraid brain share}:/${SOURCE_NAME:-my-brain}
       # Caddy config is baked into the image; bind-mount read-only. (Path, ro)
       - ./rootfs/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
 

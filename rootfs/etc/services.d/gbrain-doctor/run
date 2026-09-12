@@ -1,6 +1,6 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
-# Weekly Monday 06:00 gbrain doctor --json. In-container s6 timer, not Hermes cron.
+# Weekly doctor on DOCTOR_DAY at DOCTOR_AT (defaults: Monday 06:00).
 set -euo pipefail
 
 # shellcheck disable=SC1091
@@ -11,7 +11,7 @@ wait_postgres
 wait_config
 
 while true; do
-  /usr/local/bin/gbrain-sleep-until monday 06:00
+  /usr/local/bin/gbrain-sleep-until "$(doctor_day)" "$(doctor_at)"
   log "weekly doctor"
   /usr/local/bin/gbrain-doctor-once || log "warn: weekly doctor failed"
 done

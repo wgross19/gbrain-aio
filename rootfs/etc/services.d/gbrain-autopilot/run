@@ -10,11 +10,12 @@ wait_postgres
 wait_config
 
 PATH_BRAIN="$(source_path)"
+INTERVAL="${AUTOPILOT_INTERVAL:-1800}"
 
 if [ -n "${BRAIN_GIT_PUSH_URL:-}" ]; then
   /usr/local/bin/gbrain-push-after-cycle &
 fi
 
-log "starting gbrain autopilot --repo ${PATH_BRAIN} --interval 1800 --no-worker"
+log "starting gbrain autopilot --repo ${PATH_BRAIN} --interval ${INTERVAL} --no-worker"
 exec gosu gbrain env HOME=/var/lib/gbrain \
-  /usr/local/bin/gbrain autopilot --repo "${PATH_BRAIN}" --interval 1800 --no-worker
+  /usr/local/bin/gbrain autopilot --repo "${PATH_BRAIN}" --interval "${INTERVAL}" --no-worker

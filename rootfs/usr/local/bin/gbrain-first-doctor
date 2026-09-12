@@ -1,0 +1,51 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# First-boot verification receipt (docs Step 3/9): one doctor --json pass after
+# first boot writes last-doctor.json. Exam only — remediation stays weekly and
+# cap-gated. Idempotent: runs once per fresh brain (marker file), so an existing
+# install skips it and keeps the weekly cadence as the source of doctor truth.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+wait_postgres
+wait_config
+
+OUT=/var/lib/gbrain/.gbrain/last-doctor.json
+MARKER=/var/lib/gbrain/.gbrain/need-first-doctor
+DONE=/var/lib/gbrain/.gbrain/first-doctor.done
+
+if [ ! -f "${MARKER}" ]; then
+  exit 0
+fi
+
+# Wait for serve health (up to 180s) so doctor sees a live brain.
+for _ in $(seq 1 90); do
+  if curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+if ! curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+  log "serve not healthy; skip first-boot doctor (weekly run will cover)"
+  exit 0
+fi
+
+set +e
+gbrain_as gbrain doctor --json >"${OUT}.tmp"
+set -e
+if [ -s "${OUT}.tmp" ]; then
+  mv "${OUT}.tmp" "${OUT}"
+  chown gbrain:users "${OUT}" || true
+  chmod 600 "${OUT}" || true
+  log "first-boot doctor receipt written"
+else
+  rm -f "${OUT}.tmp"
+  log "warn: first-boot doctor produced no output"
+fi
+
+rm -f "${MARKER}"
+touch "${DONE}"
+chown gbrain:users "${DONE}" || true

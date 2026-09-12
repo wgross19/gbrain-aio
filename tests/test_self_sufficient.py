@@ -66,8 +66,8 @@ def _rootfs_blob() -> str:
 def test_first_boot_uses_spec_init_and_schema() -> None:
     script = _first_boot()
     assert "gbrain init" in script  # nosec B101
-    assert "--embedding-model ollama:embeddinggemma" in script  # nosec B101
-    assert "--embedding-dimensions 768" in script  # nosec B101
+    assert '--embedding-model "${EMBEDDING_MODEL:-ollama:embeddinggemma}"' in script  # nosec B101
+    assert '--embedding-dimensions "${EMBEDDING_DIMENSIONS:-768}"' in script  # nosec B101
     assert "--non-interactive" in script  # nosec B101
     assert "--skip-embed-check" in script  # nosec B101
     assert "git init" in script  # nosec B101
@@ -75,7 +75,7 @@ def test_first_boot_uses_spec_init_and_schema() -> None:
     assert "safe.directory" in script  # nosec B101
     assert "sources add" in script  # nosec B101
     assert "sources federate" in script  # nosec B101
-    assert "schema use gbrain-everything" in script  # nosec B101
+    assert 'schema use "${SCHEMA_PACK:-gbrain-everything}"' in script  # nosec B101
     assert "gbrain-merge-file-config" in script  # nosec B101
     assert "--force" not in script  # nosec B101
 
@@ -103,10 +103,11 @@ def test_worker_supervisor_unchanged() -> None:
     assert "autopilot" not in worker  # nosec B101
 
 
-def test_autopilot_is_s6_longrun_30m_no_worker() -> None:
+def test_autopilot_is_s6_longrun_configurable_no_worker() -> None:
     auto = _autopilot()
     assert "--repo" in auto  # nosec B101
-    assert "--interval 1800" in auto  # nosec B101
+    assert '--interval "${INTERVAL}"' in auto  # nosec B101
+    assert 'INTERVAL="${AUTOPILOT_INTERVAL:-1800}"' in auto  # nosec B101
     assert "--no-worker" in auto  # nosec B101
     assert "--install" not in auto  # nosec B101
     assert "gbrain-push-after-cycle" in auto  # nosec B101
@@ -115,9 +116,9 @@ def test_autopilot_is_s6_longrun_30m_no_worker() -> None:
 def test_dream_and_doctor_are_in_container_timers() -> None:
     dream = _dream_svc()
     doctor = _doctor_svc()
-    assert "gbrain-sleep-until 02:00" in dream  # nosec B101
+    assert 'gbrain-sleep-until "$(dream_at)"' in dream  # nosec B101
     assert "gbrain-dream-once" in dream  # nosec B101
-    assert "gbrain-sleep-until monday 06:00" in doctor  # nosec B101
+    assert 'gbrain-sleep-until "$(doctor_day)" "$(doctor_at)"' in doctor  # nosec B101
     assert "gbrain-doctor-once" in doctor  # nosec B101
     assert "gbrain dream --dir" in _read(
         "rootfs/usr/local/bin/gbrain-dream-once"
@@ -263,11 +264,9 @@ def test_file_plane_chat_and_optional_toggles() -> None:
             "PARSER_PROBE_ENABLED": "on",
         }
     )
-    assert cfg["chat_model"] == "together:deepseek-v4-flash:cloud"  # nosec B101
-    assert cfg["expansion_model"] == "together:deepseek-v4-flash:cloud"  # nosec B101
-    assert (
-        cfg["provider_base_urls"]["together"] == "http://example.invalid:11434/v1"
-    )  # nosec B101
+    assert cfg["chat_model"] == "ollama:deepseek-v4-flash:cloud"  # nosec B101
+    assert cfg["expansion_model"] == "ollama:deepseek-v4-flash:cloud"  # nosec B101
+    assert "provider_base_urls" not in cfg  # nosec B101
     assert cfg["dream"]["drift"]["enabled"] is True  # nosec B101
     assert cfg["cycle"]["skillopt"]["enabled"] is True  # nosec B101
     assert cfg["autopilot"]["nightly_quality_probe"]["enabled"] is True  # nosec B101

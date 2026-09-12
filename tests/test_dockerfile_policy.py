@@ -113,7 +113,7 @@ def test_postgres_password_is_required_and_alphanumeric() -> None:
 
 def test_cert_is_reused_when_present() -> None:
     tls = _caddy_tls()
-    assert "reusing existing Caddy TLS cert" in tls  # nosec B101
+    assert "TLS cert covers all required SAN entries" in tls or "TLS cert already present" in tls  # nosec B101
     assert "cert.pem" in tls and "key.pem" in tls  # nosec B101
 
 
@@ -128,7 +128,7 @@ def test_autopilot_service_waits_for_postgres_and_uses_no_worker() -> None:
     auto = _autopilot()
     assert "wait_postgres" in auto  # nosec B101
     assert "--no-worker" in auto  # nosec B101
-    assert "--interval 1800" in auto  # nosec B101
+    assert '--interval "${INTERVAL}"' in auto  # nosec B101
 
 
 def test_dockerfile_pins_upstream_sha() -> None:

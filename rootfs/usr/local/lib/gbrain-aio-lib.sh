@@ -22,6 +22,18 @@ source_path() {
 	printf '/%s' "$(source_name)"
 }
 
+dream_at() {
+	printf '%s' "${DREAM_AT:-02:00}"
+}
+
+doctor_day() {
+	printf '%s' "${DOCTOR_DAY:-monday}"
+}
+
+doctor_at() {
+	printf '%s' "${DOCTOR_AT:-06:00}"
+}
+
 config_json() {
 	printf '%s' /var/lib/gbrain/.gbrain/config.json
 }

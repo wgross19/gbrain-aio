@@ -1,0 +1,43 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Graph backfill for PREEXISTING brain repos (docs Step 4.5): typed-link and
+# timeline backfill from DB-imported markdown. Both upstream commands are
+# idempotent, so a fresh repo (empty graph) converges harmlessly; a preexisting
+# repo gets its links + timeline_entries populated without waiting for pages
+# to change. Runs once after the first successful source sync (marker file).
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+wait_config
+
+NAME="$(source_name)"
+MARKER=/var/lib/gbrain/.gbrain/need-graph-backfill
+DONE=/var/lib/gbrain/.gbrain/graph-backfill.done
+
+if [ ! -f "${MARKER}" ]; then
+  exit 0
+fi
+
+# --- Fresh-repo detection ----------------------------------------------------
+# A preexisting repo has content pages before any sync; a fresh repo is empty.
+# Used only for the log line; the backfill itself is idempotent either way.
+PAGE_COUNT="$(gbrain_as gbrain stats --json 2>/dev/null | sed -n 's/.*"total_pages":[[:space:]]*\([0-9]*\).*/\1/p' | head -1)"
+case "${PAGE_COUNT}" in
+  ''|0) log "graph backfill: fresh repo (nothing to backfill; still running for safety)" ;;
+  *) log "graph backfill: preexisting repo detected (~${PAGE_COUNT} pages)" ;;
+esac
+
+log "extract links --source db --source-id ${NAME}"
+gbrain_as gbrain extract links --source db --source-id "${NAME}" \
+  || log "warn: link backfill failed"
+log "extract timeline --source db --source-id ${NAME}"
+gbrain_as gbrain extract timeline --source db --source-id "${NAME}" \
+  || log "warn: timeline backfill failed"
+
+rm -f "${MARKER}"
+touch "${DONE}"
+chown gbrain:users "${DONE}" || true
+log "graph backfill complete"

@@ -129,26 +129,29 @@ write_file_plane() {
 }
 
 mark_need_first_sync() {
-  install -d -m 0755 /var/lib/gbrain/.gbrain
-  touch /var/lib/gbrain/.gbrain/need-first-sync
-  chown gbrain:users /var/lib/gbrain/.gbrain/need-first-sync || true
+	install -d -m 0755 /var/lib/gbrain/.gbrain
+	touch /var/lib/gbrain/.gbrain/need-first-sync
+	touch /var/lib/gbrain/.gbrain/need-first-doctor
+	touch /var/lib/gbrain/.gbrain/need-graph-backfill
+	chown gbrain:users /var/lib/gbrain/.gbrain/need-first-sync || true
+	chown gbrain:users /var/lib/gbrain/.gbrain/need-graph-backfill || true
 }
 
 if [ ! -f "${CONFIG}" ]; then
-  log "first boot: gbrain init embeddinggemma 768d"
-  # --skip-embed-check: keyless/empty Ollama must not hang the live embed probe.
-  # Spec: do init, then serve; do not block HTTP.
-  gbrain_as gbrain init \
-    --url "${DATABASE_URL}" \
-    --embedding-model ollama:embeddinggemma \
-    --embedding-dimensions 768 \
-    --non-interactive \
-    --skip-embed-check
-  ensure_git_repo
-  ensure_safe_directory
-  register_and_federate
-  log "first boot: schema use gbrain-everything"
-  gbrain_as gbrain schema use gbrain-everything
+	log "first boot: gbrain init embeddinggemma 768d"
+	# --skip-embed-check: keyless/empty Ollama must not hang the live embed probe.
+	# Spec: do init, then serve; do not block HTTP.
+	gbrain_as gbrain init \
+		--url "${DATABASE_URL}" \
+		--embedding-model "${EMBEDDING_MODEL:-ollama:embeddinggemma}" \
+		--embedding-dimensions "${EMBEDDING_DIMENSIONS:-768}" \
+		--non-interactive \
+		--skip-embed-check
+	ensure_git_repo
+	ensure_safe_directory
+	register_and_federate
+	log "first boot: schema use ${SCHEMA_PACK:-gbrain-everything}"
+	gbrain_as gbrain schema use "${SCHEMA_PACK:-gbrain-everything}"
   write_file_plane
   mark_need_first_sync
   log "first boot: file-plane config written"

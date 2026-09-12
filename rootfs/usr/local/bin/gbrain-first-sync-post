@@ -1,0 +1,58 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# First-boot post-sync work, run detached from gbrain-http/run after enqueue:
+#   1. first-boot doctor receipt (docs Steps 3/9)
+#   2. graph backfill (docs Step 4.5) AFTER the first source sync completes —
+#      for preexisting repos (XML brain path mapped to an existing share) this
+#      populates links + timeline_entries; for fresh repos both upstream
+#      commands are idempotent no-ops.
+# Marker-gated: runs once per fresh brain; restarts are no-ops.
+set -euo pipefail
+
+# shellcheck disable=SC1091
+. /usr/local/lib/gbrain-aio-lib.sh
+
+load_runtime
+
+DOCTOR_MARKER=/var/lib/gbrain/.gbrain/need-first-doctor
+BACKFILL_MARKER=/var/lib/gbrain/.gbrain/need-graph-backfill
+[ -f "${DOCTOR_MARKER}" ] || [ -f "${BACKFILL_MARKER}" ] || exit 0
+
+# Wait for serve health (up to 180s).
+for _ in $(seq 1 90); do
+  if curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+if ! curl -fsS http://127.0.0.1:3131/health >/dev/null 2>&1; then
+  log "serve not healthy; first-boot one-shots skipped (markers persist)"
+  exit 0
+fi
+
+# --- First-boot doctor receipt ----------------------------------------------
+if [ -f "${DOCTOR_MARKER}" ]; then
+  /usr/local/bin/gbrain-first-doctor || log "warn: first-boot doctor failed"
+fi
+
+# --- Wait for the first sync job to finish, then backfill --------------------
+if [ -f "${BACKFILL_MARKER}" ]; then
+  JOB_FILE=/var/lib/gbrain/.gbrain/first-sync.job
+  if [ -s "${JOB_FILE}" ]; then
+    JOB_ID="$(cat "${JOB_FILE}")"
+    for _ in $(seq 1 60); do
+      STATUS="$(gbrain_as gbrain jobs get "${JOB_ID}" --json 2>/dev/null \
+        | sed -n 's/.*"status":[[:space:]]*"\([a-z_]*\)".*/\1/p' | head -1)"
+      case "${STATUS}" in
+        completed|failed|cancelled|abandoned|exhausted) break ;;
+      esac
+      sleep 5
+    done
+    log "first sync job ${JOB_ID} status: ${STATUS:-timeout}"
+  else
+    log "no first-sync job id on record; running backfill after grace delay"
+    sleep 120
+  fi
+  /usr/local/bin/gbrain-graph-backfill || log "warn: graph backfill failed"
+fi
+exit 0
