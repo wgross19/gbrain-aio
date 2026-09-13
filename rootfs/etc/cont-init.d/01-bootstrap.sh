@@ -5,7 +5,6 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
-
 SOURCE_NAME="${SOURCE_NAME:-my-brain}"
 SOURCE_PATH="/${SOURCE_NAME}"
 # --- Single appdata root: AIO_APPDATA (container path of the one host mount) --
