@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.3 - 2026-09-13
+
+### Features
+
+- Single appdata root (AIO_APPDATA) with auto-created sub-folders
+
+### Fixes
+
+- Bootstrap order — derive paths before creating dirs
+
+- Caddy renders to /etc/caddy/Caddyfile (run script read the unrendered path)
+
+### style
+
+- Nosec B101 on new asserts + trunk fmt
+
+- Shfmt blank-line normalization in bootstrap
+
 ## v0.50.0.0-aio.2 - 2026-09-12
 
 ### Fixes
