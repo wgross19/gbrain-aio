@@ -11,5 +11,5 @@ wait_postgres
 # default 1280-d schema before init writes embeddinggemma 768.
 wait_config
 
-exec gosu gbrain env HOME=/var/lib/gbrain \
+exec gosu gbrain env HOME="${GBRAIN_HOME:-/var/lib/gbrain}" \
   /usr/local/bin/gbrain jobs supervisor --nice 10

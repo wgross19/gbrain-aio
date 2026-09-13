@@ -7,7 +7,7 @@
 }
 
 :3132 {
-	tls /config/caddy/certs/cert.pem /config/caddy/certs/key.pem
+	tls __CERT_DIR__/cert.pem __CERT_DIR__/key.pem
 	redir /admin /admin/ 308
 	reverse_proxy 127.0.0.1:3131
 }

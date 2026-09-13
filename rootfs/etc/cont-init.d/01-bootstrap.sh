@@ -5,12 +5,48 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
-install -d -m 0755 /var/lib/gbrain /data/postgres /run/postgresql /config/caddy/certs
-chown -R gbrain:users /var/lib/gbrain
-chown -R postgres:postgres /data/postgres /run/postgresql
+install -d -m 0755 "${GBRAIN_HOME_DIR}" "${POSTGRES_DATA}" /run/postgresql "${CADDY_CERTS}/certs"
+chown -R gbrain:users "${GBRAIN_HOME_DIR}"
+chown -R postgres:postgres "${POSTGRES_DATA}" /run/postgresql
 
 SOURCE_NAME="${SOURCE_NAME:-my-brain}"
 SOURCE_PATH="/${SOURCE_NAME}"
+# --- Single appdata root: AIO_APPDATA (container path of the one host mount) --
+# Defaults preserve the legacy split layout when AIO_APPDATA is not set.
+AIO_APPDATA="${AIO_APPDATA-}"
+if [[ -n ${AIO_APPDATA} ]]; then
+	POSTGRES_DATA="${AIO_APPDATA}/data/postgres"
+	GBRAIN_HOME_DIR="${AIO_APPDATA}/gbrain-home"
+	CADDY_CERTS="${AIO_APPDATA}/caddy"
+	# One-time data adoption: an existing install upgrading to the single-root
+	# layout keeps its data. Copy only when the legacy location has content and
+	# the new location does not (idempotent; never overwrites live data).
+	if [[ -d /var/lib/gbrain && ! -d ${GBRAIN_HOME_DIR}/.gbrain && -d /var/lib/gbrain/.gbrain ]]; then
+		log "migrating gbrain-home -> ${GBRAIN_HOME_DIR}"
+		mkdir -p "${GBRAIN_HOME_DIR}"
+		if ! cp -a /var/lib/gbrain/. "${GBRAIN_HOME_DIR}/"; then
+			log "warn: gbrain-home migration incomplete"
+		fi
+	fi
+	if [[ -d /data/postgres && ! -s ${POSTGRES_DATA}/PG_VERSION ]]; then
+		log "migrating postgres data -> ${POSTGRES_DATA}"
+		mkdir -p "${POSTGRES_DATA}"
+		if ! cp -a /data/postgres/. "${POSTGRES_DATA}/"; then
+			log "warn: postgres migration incomplete"
+		fi
+	fi
+	if [[ -d /config/caddy/certs && ! -s ${CADDY_CERTS}/certs/cert.pem ]]; then
+		log "migrating caddy certs -> ${CADDY_CERTS}"
+		mkdir -p "${CADDY_CERTS}"
+		if ! cp -a /config/caddy/. "${CADDY_CERTS}/"; then
+			log "warn: caddy migration incomplete"
+		fi
+	fi
+else
+	POSTGRES_DATA="/data/postgres"
+	GBRAIN_HOME_DIR="/var/lib/gbrain"
+	CADDY_CERTS="/config/caddy"
+fi
 if [[ -d ${SOURCE_PATH} ]]; then
 	BRAIN_UID="${BRAIN_UID:-999}"
 	BRAIN_GID="${BRAIN_GID:-100}"
@@ -97,10 +133,13 @@ if [[ -n ${OLLAMA_BASE_URL-} && -z ${TOGETHER_KEY} ]]; then
 fi
 
 umask 077
-cat >/var/lib/gbrain/runtime.env <<EOF
+cat >"${GBRAIN_HOME_DIR}/runtime.env" <<EOF
 DATABASE_URL=${ENCODED_URL}
 GBRAIN_DATABASE_URL=${ENCODED_URL}
-GBRAIN_HOME=/var/lib/gbrain
+GBRAIN_HOME=${GBRAIN_HOME_DIR}
+PGDATA=${POSTGRES_DATA}
+CERT_DIR=${CADDY_CERTS}/certs
+AIO_APPDATA=${AIO_APPDATA-}
 GBRAIN_HTTP_PORT=${GBRAIN_HTTP_PORT:-3131}
 GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
 GBRAIN_LAN_BIND=${GBRAIN_LAN_BIND}
@@ -124,6 +163,6 @@ CERT_EXTRA_DNS=${CERT_EXTRA_DNS-}
 CERT_EXTRA_IPS=${CERT_EXTRA_IPS-}
 GBRAIN_EXTRA_CONFIG=${GBRAIN_EXTRA_CONFIG-}
 EOF
-chown gbrain:users /var/lib/gbrain/runtime.env
-chmod 600 /var/lib/gbrain/runtime.env
+chown gbrain:users "${GBRAIN_HOME_DIR}/runtime.env"
+chmod 600 "${GBRAIN_HOME_DIR}/runtime.env"
 log "runtime env written (password not logged)"

@@ -8,8 +8,8 @@ set -euo pipefail
 
 load_runtime
 
-OUT=/var/lib/gbrain/.gbrain/last-doctor.json
-install -d -m 0755 /var/lib/gbrain/.gbrain
+OUT="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/last-doctor.json
+install -d -m 0755 "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain
 
 set +e
 gbrain_as gbrain doctor --json >"${OUT}.tmp"

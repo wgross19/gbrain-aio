@@ -14,8 +14,8 @@ set -euo pipefail
 
 load_runtime
 
-DOCTOR_MARKER=/var/lib/gbrain/.gbrain/need-first-doctor
-BACKFILL_MARKER=/var/lib/gbrain/.gbrain/need-graph-backfill
+DOCTOR_MARKER="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-doctor
+BACKFILL_MARKER="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-graph-backfill
 [ -f "${DOCTOR_MARKER}" ] || [ -f "${BACKFILL_MARKER}" ] || exit 0
 
 # Wait for serve health (up to 180s).
@@ -37,7 +37,7 @@ fi
 
 # --- Wait for the first sync job to finish, then backfill --------------------
 if [ -f "${BACKFILL_MARKER}" ]; then
-  JOB_FILE=/var/lib/gbrain/.gbrain/first-sync.job
+  JOB_FILE="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/first-sync.job
   if [ -s "${JOB_FILE}" ]; then
     JOB_ID="$(cat "${JOB_FILE}")"
     for _ in $(seq 1 60); do

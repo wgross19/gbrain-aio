@@ -8,8 +8,8 @@ set -euo pipefail
 
 load_runtime
 
-MARKER=/var/lib/gbrain/.gbrain/need-first-sync
-DONE=/var/lib/gbrain/.gbrain/first-sync.enqueued
+MARKER="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-sync
+DONE="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/first-sync.enqueued
 if [ ! -f "${MARKER}" ]; then
   exit 0
 fi
@@ -32,8 +32,8 @@ JOB_ID="$(gbrain_as gbrain jobs submit sync \
   --params "${PARAMS}" \
   --idempotency-key "first-boot-sync:${NAME}" 2>/dev/null | tail -1 || true)"
 if [ -n "${JOB_ID:-}" ]; then
-  printf '%s\n' "${JOB_ID}" > /var/lib/gbrain/.gbrain/first-sync.job
-  chown gbrain:users /var/lib/gbrain/.gbrain/first-sync.job || true
+  printf '%s\n' "${JOB_ID}" > "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/first-sync.job
+  chown gbrain:users "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/first-sync.job || true
   log "first sync job recorded: ${JOB_ID}"
 fi
 rm -f "${MARKER}"

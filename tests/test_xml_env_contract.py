@@ -37,11 +37,20 @@ def _bootstrap_env_reads() -> set[str]:
 
 def _runtime_env_keys() -> set[str]:
     s = BOOTSTRAP.read_text()
-    m = re.search(r"cat >/var/lib/gbrain/runtime\.env <<EOF\n(.*?)\nEOF\n", s, re.S)
-    assert (
-        m
-    ), "runtime.env heredoc not found in bootstrap"  # nosec B101 # test assertions
-    return set(re.findall(r"^([A-Z][A-Z0-9_]*)=", m.group(1), re.M))
+    "runtime.env" + chr(34) + " <<EOF" if False else None
+    # heredoc line: cat >"..."/runtime.env" <<EOF (redirect target may be quoted/derived)
+    idx = s.find("runtime.env")
+    m = None
+    if idx != -1:
+        heredoc_start = s.find("<<EOF", idx)
+        if heredoc_start != -1:
+            body_start = heredoc_start + len("<<EOF\n")
+            body_end = s.find("\nEOF\n", body_start)
+            if body_end != -1:
+                heredoc = s[body_start:body_end]
+                m = re.findall(r"^([A-Z][A-Z0-9_]*)=", heredoc, re.M)
+                return set(m)
+    return set()
 
 
 def _s6_env_reads() -> set[str]:
@@ -169,6 +178,9 @@ def test_runtime_env_heredoc_matches_xml_surface() -> None:
         "GBRAIN_HTTP_BIND",
         "TS_SOCKET",
         "OLLAMA_API_KEY",
+        "PGDATA",
+        "CERT_DIR",
+        "AIO_APPDATA",
         "TOGETHER_API_KEY",
         "TS_DERIVED_DNS_NAME",
         "TS_DERIVED_IP",
@@ -239,3 +251,23 @@ def test_http_launches_post_helper_detached() -> None:
     assert s.index("gbrain serve --http") > s.index(
         "gbrain-first-sync-post &"
     )  # nosec B101 # test assertions
+
+
+def test_single_appdata_root_field_present() -> None:
+    tree = ET.parse(XML)  # nosec B406,B314  # own repo file, trusted source
+    targets = {el.get("Target") for el in tree.iter("Config") if el.get("Type") == "Path"}
+    assert "/data/aio" in targets, "single appdata root must be exposed"
+    assert "/data/postgres" not in targets and "/var/lib/gbrain" not in targets and "/config/caddy" not in targets
+
+
+def test_bootstrap_derives_paths_from_aio_appdata() -> None:
+    s = BOOTSTRAP.read_text()
+    assert "AIO_APPDATA" in s
+    assert "POSTGRES_DATA=" in s and "GBRAIN_HOME_DIR=" in s and "CADDY_CERTS=" in s
+    # adoption migration present (legacy -> single root)
+    assert "migrating gbrain-home" in s
+
+
+def test_runtime_env_carries_derived_paths() -> None:
+    keys = _runtime_env_keys()
+    assert {"GBRAIN_HOME", "PGDATA", "CERT_DIR"} <= keys

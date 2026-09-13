@@ -5,7 +5,16 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
+# runtime.env (written by 01-bootstrap) carries the derived PGDATA/CERT_DIR/GBRAIN_HOME
+if [[ -f "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env" ]]; then
+	set -a
+	# shellcheck disable=SC1091
+	. "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
+	set +a
+fi
+
 PGDATA="${PGDATA:-/data/postgres}"
+# runtime.env (written by bootstrap) carries the derived PGDATA when AIO_APPDATA is set
 install -d -m 0700 "${PGDATA}"
 install -d -m 2775 /run/postgresql
 chown -R postgres:postgres "${PGDATA}" /run/postgresql

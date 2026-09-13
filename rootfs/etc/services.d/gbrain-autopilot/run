@@ -17,5 +17,5 @@ if [ -n "${BRAIN_GIT_PUSH_URL:-}" ]; then
 fi
 
 log "starting gbrain autopilot --repo ${PATH_BRAIN} --interval ${INTERVAL} --no-worker"
-exec gosu gbrain env HOME=/var/lib/gbrain \
+exec gosu gbrain env HOME="${GBRAIN_HOME:-/var/lib/gbrain}" \
   /usr/local/bin/gbrain autopilot --repo "${PATH_BRAIN}" --interval "${INTERVAL}" --no-worker

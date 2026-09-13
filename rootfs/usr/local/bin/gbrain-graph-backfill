@@ -14,8 +14,8 @@ load_runtime
 wait_config
 
 NAME="$(source_name)"
-MARKER=/var/lib/gbrain/.gbrain/need-graph-backfill
-DONE=/var/lib/gbrain/.gbrain/graph-backfill.done
+MARKER="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-graph-backfill
+DONE="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/graph-backfill.done
 
 if [ ! -f "${MARKER}" ]; then
   exit 0

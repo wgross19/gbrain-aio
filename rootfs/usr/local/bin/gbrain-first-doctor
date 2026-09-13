@@ -13,9 +13,9 @@ load_runtime
 wait_postgres
 wait_config
 
-OUT=/var/lib/gbrain/.gbrain/last-doctor.json
-MARKER=/var/lib/gbrain/.gbrain/need-first-doctor
-DONE=/var/lib/gbrain/.gbrain/first-doctor.done
+OUT="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/last-doctor.json
+MARKER="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-doctor
+DONE="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/first-doctor.done
 
 if [ ! -f "${MARKER}" ]; then
   exit 0

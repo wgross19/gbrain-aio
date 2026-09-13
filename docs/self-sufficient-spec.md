@@ -6,6 +6,8 @@ Goal: a new Unraid user fills the template, clicks Apply, and the container star
 
 ## Product rules
 
+0. Single appdata root: one host mount `AIO_APPDATA` (default `/mnt/user/appdata/gbrain-aio` → `/data/aio`). Postgres data, gbrain-home, and Caddy certs are sub-folders created by bootstrap. Existing installs are adopted automatically (legacy split layout copied once, only if the target is empty).
+
 1. Generic template only. No homelab IPs, repo names, or operator-specific comments.
 2. Empty optional fields mean off; script defaults apply when a field is empty.
 3. File-plane `config.json` is canonical. Do not rely on `gbrain config set` for durable defaults (DB plane is shadowed).

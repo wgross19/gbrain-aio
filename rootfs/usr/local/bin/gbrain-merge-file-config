@@ -45,7 +45,7 @@ function setDotted(obj: Record<string, unknown>, path: string, value: unknown): 
   cursor[parts[parts.length - 1]] = value;
 }
 
-const configPath = process.env.CONFIG_PATH || "/var/lib/gbrain/.gbrain/config.json";
+const configPath = process.env.CONFIG_PATH || (process.env.GBRAIN_HOME || "/var/lib/gbrain") + "/.gbrain/config.json";
 const sourcePath = process.env.SOURCE_PATH || "";
 const ollamaBase = (process.env.OLLAMA_BASE_URL || "").trim();
 const chatModelName = (process.env.CHAT_MODEL || "deepseek-v4-flash:cloud").trim();

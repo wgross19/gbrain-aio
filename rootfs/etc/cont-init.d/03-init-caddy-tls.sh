@@ -7,16 +7,17 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
-CERT_DIR="${CERT_DIR:-/config/caddy/certs}"
-
 # Bootstrap (01-bootstrap.sh) has already written runtime.env by the time this
-# cont-init runs; source it so derived values (LAN_BIND, extras) are visible.
-if [[ -f /var/lib/gbrain/runtime.env ]]; then
+# cont-init runs; source it FIRST so the derived CERT_DIR (single appdata root)
+# and LAN_BIND/extras are visible. The literal fallback preserves the legacy
+# split layout for standalone installs without AIO_APPDATA.
+if [[ -f "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env" ]]; then
 	set -a
 	# shellcheck disable=SC1091
-	. /var/lib/gbrain/runtime.env
+	. "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
 	set +a
 fi
+CERT_DIR="${CERT_DIR:-/config/caddy/certs}"
 
 SAN_IP="${GBRAIN_LAN_BIND-}"
 if [[ -z ${SAN_IP} ]]; then

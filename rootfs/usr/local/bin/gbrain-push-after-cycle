@@ -14,7 +14,7 @@ if [ -z "${BRAIN_GIT_PUSH_URL:-}" ]; then
 fi
 
 PATH_BRAIN="$(source_path)"
-STATE=/var/lib/gbrain/.gbrain/last-pushed-cycle-id
+STATE="${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/last-pushed-cycle-id
 DB="${POSTGRES_DB:-gbrain}"
 export PGPASSWORD="${POSTGRES_PASSWORD:-}"
 

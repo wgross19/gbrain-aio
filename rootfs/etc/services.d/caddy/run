@@ -1,4 +1,14 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
 set -euo pipefail
+
+# Render the Caddyfile with the runtime cert paths, then run Caddy.
+# AIO_APPDATA single-root installs carry CERT_DIR in runtime.env (sourced by
+# with-contenv); legacy split installs fall back to the baked paths.
+CERT_DIR="${CERT_DIR:-/config/caddy/certs}"
+
+sed \
+  -e "s|__CERT_DIR__|${CERT_DIR}|g" \
+  /etc/caddy/Caddyfile.template >/etc/caddy/Caddyfile.rendered
+
 exec /usr/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile

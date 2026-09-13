@@ -53,18 +53,8 @@ First run (details are in each field's help text):
   </Networking>
   <Data>
     <Volume>
-      <HostDir>/mnt/user/appdata/gbrain-aio/data/postgres</HostDir>
-      <ContainerDir>/data/postgres</ContainerDir>
-      <Mode>rw</Mode>
-    </Volume>
-    <Volume>
-      <HostDir>/mnt/user/appdata/gbrain-aio/gbrain-home</HostDir>
-      <ContainerDir>/var/lib/gbrain</ContainerDir>
-      <Mode>rw</Mode>
-    </Volume>
-    <Volume>
-      <HostDir>/mnt/user/appdata/gbrain-aio/caddy</HostDir>
-      <ContainerDir>/config/caddy</ContainerDir>
+      <HostDir>/mnt/user/appdata/gbrain-aio</HostDir>
+      <ContainerDir>/data/aio</ContainerDir>
       <Mode>rw</Mode>
     </Volume>
     <Volume>
@@ -76,9 +66,7 @@ First run (details are in each field's help text):
   <Environment/>
 
   <Config Name="Web UI Port" Target="3132" Default="3132" Mode="tcp" Description="Published HTTPS port (Caddy)." Type="Port" Display="always" Required="true" Mask="false">3132</Config>
-  <Config Name="Postgres Data" Target="/data/postgres" Default="/mnt/user/appdata/gbrain-aio/data/postgres" Mode="rw" Description="Persistent PostgreSQL data." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/data/postgres</Config>
-  <Config Name="GBrain Home" Target="/var/lib/gbrain" Default="/mnt/user/appdata/gbrain-aio/gbrain-home" Mode="rw" Description="GBrain config, OAuth secrets, runtime.env." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/gbrain-home</Config>
-  <Config Name="Caddy Certs" Target="/config/caddy" Default="/mnt/user/appdata/gbrain-aio/caddy" Mode="rw" Description="Persistent TLS certs and CA." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio/caddy</Config>
+  <Config Name="Appdata Root" Target="/data/aio" Default="/mnt/user/appdata/gbrain-aio" Mode="rw" Description="Single persistent folder. Sub-folders are created automatically: data/postgres (database), gbrain-home (config, OAuth, runtime.env), caddy (TLS certs + CA)." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio</Config>
   <Config Name="Brain Path" Target="/my-brain" Default="/mnt/user/my-brain" Mode="rw" Description="Host path to the brain markdown repo. This is the folder GBrain reads/writes as its knowledge base. It should be an empty folder (or a git repo) that GBrain will initialize. The folder name must match the Source Name below." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/my-brain</Config>
   <Config Name="Postgres User" Target="POSTGRES_USER" Default="gbrain" Mode="" Description="Postgres superuser. Keep gbrain." Type="Variable" Display="advanced" Required="false" Mask="false">gbrain</Config>
   <Config Name="Postgres Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="REQUIRED. Alphanumeric only (A-Za-z0-9). Secret. Example: mypass123. Generate: head -c 16 /dev/urandom | base64 | tr -d '+/=' | head -c 16" Type="Variable" Display="always" Required="true" Mask="true"/>

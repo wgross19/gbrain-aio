@@ -62,7 +62,7 @@ RUN apt-get update \
   && tar -C / -Jxpf /tmp/s6-arch.tar.xz \
   && rm -f /tmp/s6-noarch.tar.xz /tmp/s6-arch.tar.xz \
   && useradd --system --uid 99 --gid users --home-dir /var/lib/gbrain --create-home gbrain \
-  && mkdir -p /opt/gbrain /var/lib/gbrain /data/postgres /run/postgresql /config/caddy/certs \
+  && mkdir -p /opt/gbrain /var/lib/gbrain /data/postgres /run/postgresql /config/caddy/certs /data/aio \
   && chown -R gbrain:users /opt/gbrain /var/lib/gbrain \
   && chown -R postgres:postgres /data/postgres /run/postgresql \
   && rm -rf /var/lib/apt/lists/*
@@ -86,7 +86,7 @@ COPY rootfs/ /
 RUN chmod 755 /etc/cont-init.d/* /etc/services.d/*/run /usr/local/bin/* /usr/local/lib/gbrain-aio-lib.sh
 
 EXPOSE 3132
-VOLUME ["/data/postgres", "/var/lib/gbrain", "/config/caddy"]
+VOLUME ["/data/aio", "/var/lib/gbrain", "/data/postgres", "/config/caddy"]
 HEALTHCHECK --interval=15s --timeout=5s --start-period=120s --retries=10 \
   CMD curl -fsS http://127.0.0.1:3131/health || exit 1
 

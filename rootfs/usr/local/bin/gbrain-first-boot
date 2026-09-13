@@ -129,12 +129,12 @@ write_file_plane() {
 }
 
 mark_need_first_sync() {
-	install -d -m 0755 /var/lib/gbrain/.gbrain
-	touch /var/lib/gbrain/.gbrain/need-first-sync
-	touch /var/lib/gbrain/.gbrain/need-first-doctor
-	touch /var/lib/gbrain/.gbrain/need-graph-backfill
-	chown gbrain:users /var/lib/gbrain/.gbrain/need-first-sync || true
-	chown gbrain:users /var/lib/gbrain/.gbrain/need-graph-backfill || true
+	install -d -m 0755 "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain
+	touch "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-sync
+	touch "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-doctor
+	touch "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-graph-backfill
+	chown gbrain:users "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-first-sync || true
+	chown gbrain:users "${GBRAIN_HOME:-/var/lib/gbrain}"/.gbrain/need-graph-backfill || true
 }
 
 if [ ! -f "${CONFIG}" ]; then

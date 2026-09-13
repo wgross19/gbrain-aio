@@ -6,10 +6,10 @@
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
 load_runtime() {
-	if [[ -f /var/lib/gbrain/runtime.env ]]; then
+	if [[ -f "${GBRAIN_HOME:-/var/lib/gbrain}"/runtime.env ]]; then
 		set -a
 		# shellcheck disable=SC1091
-		. /var/lib/gbrain/runtime.env
+		. "${GBRAIN_HOME:-/var/lib/gbrain}"/runtime.env
 		set +a
 	fi
 }
@@ -35,7 +35,7 @@ doctor_at() {
 }
 
 config_json() {
-	printf '%s' /var/lib/gbrain/.gbrain/config.json
+	printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}/.gbrain/config.json"
 }
 
 is_on() {
@@ -84,7 +84,7 @@ wait_config() {
 }
 
 gbrain_as() {
-	gosu gbrain env HOME=/var/lib/gbrain "$@"
+	gosu gbrain env HOME="${GBRAIN_HOME:-/var/lib/gbrain}" "$@"
 }
 
 normalize_ollama_v1() {

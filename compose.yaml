@@ -68,6 +68,8 @@ services:
       GBRAIN_ADMIN_BOOTSTRAP_TOKEN: ${GBRAIN_ADMIN_BOOTSTRAP_TOKEN:-}
       # Unraid host LAN IP: the single required network input (cert SAN + origin).
       GBRAIN_LAN_BIND: ${GBRAIN_LAN_BIND}
+      # Single appdata root (container path of the one host mount). Empty = legacy split layout.
+      AIO_APPDATA: ${AIO_APPDATA:-/data/aio}
       # UID/GID for the brain repo bind mount (Unraid default 99:100). (Variable)
       BRAIN_UID: ${BRAIN_UID:-99}
       BRAIN_GID: ${BRAIN_GID:-100}
@@ -128,16 +130,13 @@ services:
     # Each maps to one XML <Config> row. "Target" is the in-container path;
     # "HostPath" is the Unraid share path the user picks.
     volumes:
-      # Postgres data. Persistent. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/data/postgres:/data/postgres
-      # GBrain home: config, OAuth secrets, runtime.env. Persistent. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/gbrain-home:/var/lib/gbrain
-      # Caddy certs + CA. Persistent so the phone trusts once. (Path, rw)
-      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}/caddy:/config/caddy
+      # Single appdata root: data/postgres + gbrain-home + caddy live under it. (Path, rw)
+      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}:/data/aio
       # The brain markdown repo. Host share -> container /<SOURCE_NAME>. (Path, rw)
       - ${BRAIN_PATH:?set BRAIN_PATH to your Unraid brain share}:/${SOURCE_NAME:-my-brain}
-      # Caddy config is baked into the image; bind-mount read-only. (Path, ro)
-      - ./rootfs/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Caddy config is baked into the image (rendered at start from the template).
+      # The single appdata root carries data/postgres, gbrain-home, caddy. (Path, rw)
+      - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}:/data/aio
 
     # --- Healthcheck (Unraid: <HealthCheck>) ---------------------------------
     # Probes the internal GBrain HTTP health endpoint. 120s start grace for
