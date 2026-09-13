@@ -7,8 +7,6 @@ set -euo pipefail
 # with-contenv); legacy split installs fall back to the baked paths.
 CERT_DIR="${CERT_DIR:-/config/caddy/certs}"
 
-sed \
-  -e "s|__CERT_DIR__|${CERT_DIR}|g" \
-  /etc/caddy/Caddyfile.template >/etc/caddy/Caddyfile.rendered
+sed -e "s|__CERT_DIR__|${CERT_DIR}|g" /etc/caddy/Caddyfile.template >/etc/caddy/Caddyfile
 
 exec /usr/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
