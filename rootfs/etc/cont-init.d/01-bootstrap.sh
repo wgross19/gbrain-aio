@@ -5,9 +5,6 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
-install -d -m 0755 "${GBRAIN_HOME_DIR}" "${POSTGRES_DATA}" /run/postgresql "${CADDY_CERTS}/certs"
-chown -R gbrain:users "${GBRAIN_HOME_DIR}"
-chown -R postgres:postgres "${POSTGRES_DATA}" /run/postgresql
 
 SOURCE_NAME="${SOURCE_NAME:-my-brain}"
 SOURCE_PATH="/${SOURCE_NAME}"
@@ -47,6 +44,10 @@ else
 	GBRAIN_HOME_DIR="/var/lib/gbrain"
 	CADDY_CERTS="/config/caddy"
 fi
+
+install -d -m 0755 "${GBRAIN_HOME_DIR}" "${POSTGRES_DATA}" /run/postgresql "${CADDY_CERTS}/certs"
+chown -R postgres:postgres "${POSTGRES_DATA}" /run/postgresql
+chown -R gbrain:users "${GBRAIN_HOME_DIR}"
 if [[ -d ${SOURCE_PATH} ]]; then
 	BRAIN_UID="${BRAIN_UID:-999}"
 	BRAIN_GID="${BRAIN_GID:-100}"
