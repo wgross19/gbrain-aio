@@ -259,7 +259,7 @@ def test_single_appdata_root_field_present() -> None:
         el.get("Target") for el in tree.iter("Config") if el.get("Type") == "Path"
     }
     assert "/data/aio" in targets, "single appdata root must be exposed"  # nosec B101
-    assert (
+    assert (  # nosec B101
         "/data/postgres" not in targets
         and "/var/lib/gbrain" not in targets
         and "/config/caddy" not in targets
@@ -269,7 +269,7 @@ def test_single_appdata_root_field_present() -> None:
 def test_bootstrap_derives_paths_from_aio_appdata() -> None:
     s = BOOTSTRAP.read_text()
     assert "AIO_APPDATA" in s  # nosec B101
-    assert (
+    assert (  # nosec B101
         "POSTGRES_DATA=" in s and "GBRAIN_HOME_DIR=" in s and "CADDY_CERTS=" in s
     )  # nosec B101
     # adoption migration present (legacy -> single root)
@@ -283,27 +283,31 @@ def test_runtime_env_carries_derived_paths() -> None:
 
 def test_option_b_fixed_source_id_and_mount() -> None:
     lib = LIB.read_text()
-    assert 'printf \'brain\'' in lib, "source id must be fixed to brain"
-    assert '/source/brain' in lib, "mount target must be /source/brain"
+    assert "printf 'brain'" in lib, "source id must be fixed to brain"  # nosec B101
+    assert "/source/brain" in lib, "mount target must be /source/brain"  # nosec B101
     tree = ET.parse(XML)  # nosec B406,B314  # own repo file, trusted source
     targets = {el.get("Target") for el in tree.iter("Config")}
-    assert "SOURCE_NAME" not in targets, "SOURCE_NAME must be gone (Option B)"
+    assert "SOURCE_NAME" not in targets, "SOURCE_NAME must be gone (Option B)"  # nosec B101
     # brain path config mounts at the fixed target
     brain = [el for el in tree.iter("Config") if el.get("Name") == "Brain Path"]
-    assert brain and brain[0].get("Target") == "/source/brain"
+    assert brain and brain[0].get("Target") == "/source/brain"  # nosec B101
 
 
 def test_extra_env_allowlist_enforced_in_bootstrap() -> None:
     s = BOOTSTRAP.read_text()
-    assert "GBRAIN_EXTRA_ENV" in s
+    assert "GBRAIN_EXTRA_ENV" in s  # nosec B101
     for allowed in (
         "GBRAIN_EMBEDDING_MULTIMODAL",
         "GBRAIN_EMBEDDING_IMAGE_OCR",
         "GBRAIN_SEARCH_EXCLUDE",
         "GBRAIN_RETRIEVAL_REFLEX_VOLUNTEER",
     ):
-        assert allowed in s, f"allowlist missing {allowed}"
+        assert allowed in s, f"allowlist missing {allowed}"  # nosec B101
     # dangerous gates must NOT be allowlisted
-    for banned in ("GBRAIN_ALLOW_SHELL_JOBS", "GBRAIN_ALLOW_PRIVATE_REMOTES", "GBRAIN_ALLOW_UNVERIFIED_REMOTE"):
+    for banned in (
+        "GBRAIN_ALLOW_SHELL_JOBS",
+        "GBRAIN_ALLOW_PRIVATE_REMOTES",
+        "GBRAIN_ALLOW_UNVERIFIED_REMOTE",
+    ):
         banned_line = [l for l in s.splitlines() if banned in l and "refused" not in l]
-        assert not banned_line, f"{banned} must not be allowlisted"
+        assert not banned_line, f"{banned} must not be allowlisted"  # nosec B101
