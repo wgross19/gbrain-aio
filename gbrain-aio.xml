@@ -17,13 +17,11 @@ First run (details are in each field's help text):
 3. Set Brain Path to an empty folder.
 4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
 5. Trust the generated CA once.</Overview>
-  <Changes>### 2026-09-13&#xD;
+  <Changes>### 2026-09-14&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Single appdata root (AIO_APPDATA) with auto-created sub-folders&#xD;
-- Bootstrap order — derive paths before creating dirs&#xD;
-- Caddy renders to /etc/caddy/Caddyfile (run script read the unrendered path)&#xD;
-- Nosec B101 on new asserts + trunk fmt&#xD;
-- Shfmt blank-line normalization in bootstrap</Changes>
+- Option B brain mounting + GBRAIN_EXTRA_ENV passthrough&#xD;
+- Black + nosec on contract test additions&#xD;
+- Prettier spec table + ruff E741 rename</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>

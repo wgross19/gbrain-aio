@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.4 - 2026-09-14
+
+### Features
+
+- Option B brain mounting + GBRAIN_EXTRA_ENV passthrough
+
+### style
+
+- Black + nosec on contract test additions
+
+- Prettier spec table + ruff E741 rename
+
 ## v0.50.0.0-aio.3 - 2026-09-13
 
 ### Features
