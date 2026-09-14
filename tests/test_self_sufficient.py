@@ -237,14 +237,14 @@ def test_file_plane_keyless_install_has_no_chat_model() -> None:
         return
     cfg, flags = _run_merge(
         {
-            "SOURCE_PATH": "/my-brain",
+            "SOURCE_PATH": "/source/brain",
             "OLLAMA_BASE_URL": "",
             "APPLY_CHAT_GATED": "0",
         }
     )
     assert cfg["embedding_model"] == "ollama:embeddinggemma"  # nosec B101
     assert cfg["embedding_dimensions"] == 768  # nosec B101
-    assert cfg["sync"]["repo_path"] == "/my-brain"  # nosec B101
+    assert cfg["sync"]["repo_path"] == "/source/brain"  # nosec B101
     assert cfg["mcp"]["publish_advisor"] is True  # nosec B101
     assert cfg["mcp"]["publish_skills"] is True  # nosec B101
     assert cfg["mcp"]["skills_dir"] == "/opt/gbrain/skills"  # nosec B101
@@ -260,7 +260,7 @@ def test_file_plane_chat_and_optional_toggles() -> None:
         return
     cfg, flags = _run_merge(
         {
-            "SOURCE_PATH": "/my-brain",
+            "SOURCE_PATH": "/source/brain",
             "OLLAMA_BASE_URL": "http://example.invalid:11434",
             "CHAT_MODEL": "deepseek-v4-flash:cloud",
             "SKILLOPT_ENABLED": "1",

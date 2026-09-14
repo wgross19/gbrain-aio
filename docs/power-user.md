@@ -20,13 +20,13 @@ docker compose --env-file .env exec -T gbrain-aio gosu gbrain env HOME=/var/lib/
 The admin dashboard and MCP share the HTTPS origin `https://<lan>:3132`.
 
 - Register a scoped OAuth client for Hermes or another agent.
-- The client must be scoped to the mounted brain source (`SOURCE_NAME`).
+- The client must be scoped to the mounted brain source (fixed id `brain`).
 - Agents connect only through MCP. They never receive `DATABASE_URL`.
 
 ## Brain Repo
 
 - `BRAIN_PATH` is the host path to the brain markdown repo. It must be a git repo.
-- `SOURCE_NAME` must equal `basename(BRAIN_PATH)`.
+- The source id is fixed to `brain`; the brain mount target is `/source/brain`.
 - `BRAIN_UID` / `BRAIN_GID` control the bind-mount ownership. Unraid default is `99:100`.
 
 ## TLS
@@ -40,8 +40,8 @@ The admin dashboard and MCP share the HTTPS origin `https://<lan>:3132`.
 
 In-container s6, not Hermes cron:
 
-- Autopilot every 30 minutes: `gbrain autopilot --repo /${SOURCE_NAME} --interval 1800 --no-worker`
-- Nightly 02:00: `gbrain dream --dir /${SOURCE_NAME}` (waits if a cycle holds the lock)
+- Autopilot every 30 minutes: `gbrain autopilot --repo /source/brain --interval 1800 --no-worker`
+- Nightly 02:00: `gbrain dream --dir /source/brain` (waits if a cycle holds the lock)
 - Weekly Monday 06:00: `gbrain doctor --json` → `~/.gbrain/last-doctor.json`
 - Optional `DOCTOR_REMEDIATE_MAX_USD` runs `gbrain doctor --remediate --max-usd N` for that run only
 - Optional `BRAIN_GIT_PUSH_URL` pushes the mounted brain after a successful `autopilot-cycle` (no force-push). Do not point a test copy at a live canonical remote.

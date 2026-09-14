@@ -74,7 +74,6 @@ services:
       BRAIN_UID: ${BRAIN_UID:-99}
       BRAIN_GID: ${BRAIN_GID:-100}
       # Name of the mounted brain source. Must equal basename(BRAIN_PATH). (Variable)
-      SOURCE_NAME: ${SOURCE_NAME:-my-brain}
       # Ollama openai-compat endpoint for embeddings + chat. (Variable)
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
       OLLAMA_API_KEY: ${OLLAMA_API_KEY:-ollama}
@@ -100,6 +99,8 @@ services:
       CERT_EXTRA_IPS: ${CERT_EXTRA_IPS:-}
       # Universal passthrough for ANY gbrain config key (key=value pairs). (Variable)
       GBRAIN_EXTRA_CONFIG: ${GBRAIN_EXTRA_CONFIG:-}
+      # Env-only passthrough (allowlisted keys). (Variable)
+      GBRAIN_EXTRA_ENV: ${GBRAIN_EXTRA_ENV:-}
       # Optional git push after a successful autopilot-cycle. Empty = off. (Variable)
       BRAIN_GIT_PUSH_URL: ${BRAIN_GIT_PUSH_URL:-}
       BRAIN_GIT_PUSH_TOKEN: ${BRAIN_GIT_PUSH_TOKEN:-}
@@ -132,8 +133,8 @@ services:
     volumes:
       # Single appdata root: data/postgres + gbrain-home + caddy live under it. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}:/data/aio
-      # The brain markdown repo. Host share -> container /<SOURCE_NAME>. (Path, rw)
-      - ${BRAIN_PATH:?set BRAIN_PATH to your Unraid brain share}:/${SOURCE_NAME:-my-brain}
+      # The brain markdown repo. Host share -> fixed container target. (Path, rw)
+      - ${BRAIN_PATH:?set BRAIN_PATH to your Unraid brain share}:/source/brain
       # Caddy config is baked into the image (rendered at start from the template).
       # The single appdata root carries data/postgres, gbrain-home, caddy. (Path, rw)
       - ${APPDATA_ROOT:-/mnt/user/appdata/Compose/gbrain-aio}:/data/aio

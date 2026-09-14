@@ -33,7 +33,7 @@ Precedence: explicit XML/env value > existing brain `config.json` > script defau
 | Brain Path    | `/mnt/user/my-brain` — must equal the share you create |
 | Web UI Port   | `3132` (HTTPS via Caddy; the only published port)      |
 
-`SOURCE_NAME` (default `my-brain`) **must equal the basename of Brain Path**. It names the gbrain source and the in-container mount `/<SOURCE_NAME>`.
+The brain mount target is fixed at `/source/brain` and the source id is fixed to `brain` — no name coupling to configure. Future sources follow the same rule: mount under `/source/<id>`, source id = basename.
 
 ### Models (advanced, empty = proven keyless defaults)
 

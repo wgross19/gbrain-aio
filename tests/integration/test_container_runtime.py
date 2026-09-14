@@ -168,10 +168,10 @@ def test_mounted_brain_path_is_visible(runtime: DockerRuntime) -> None:
     with docker_volume("gbrain-aio-pytest-brain") as brain_volume:
         with runtime.container(brain_mount=brain_volume) as c:
             c.wait_for_internal_health()
-            # The brain mount is exposed at /test-brain (SOURCE_NAME=test-brain).
-            assert c.path_exists("/test-brain")  # nosec B101
+            # The brain mount is exposed at the fixed target /source/brain.
+            assert c.path_exists("/source/brain")  # nosec B101
             # Bootstrap chowns it to BRAIN_UID:BRAIN_GID (99:100).
-            result = c.exec("stat -c '%u:%g' /test-brain")
+            result = c.exec("stat -c '%u:%g' /source/brain")
             assert result.stdout.strip() == "99:100"  # nosec B101
 
 

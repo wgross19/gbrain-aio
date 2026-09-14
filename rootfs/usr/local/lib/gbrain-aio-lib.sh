@@ -15,11 +15,13 @@ load_runtime() {
 }
 
 source_name() {
-	printf '%s' "${SOURCE_NAME:-my-brain}"
+	# Option B: neutral fixed source id. Mount target is /source/brain; the
+	# source id, mount name, and basename are one and the same by design.
+	printf 'brain'
 }
 
 source_path() {
-	printf '/%s' "$(source_name)"
+	printf '/source/brain'
 }
 
 dream_at() {

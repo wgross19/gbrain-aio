@@ -28,8 +28,8 @@ Precedence: explicit env (XML) > existing `config.json` values on existing brain
 | Job             | When                                                      | Command / process                                                                |
 | --------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Jobs supervisor | always                                                    | existing `gbrain-worker` (`gbrain jobs supervisor --nice`)                       |
-| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s)                | s6 longrun: `gbrain autopilot --repo /${SOURCE_NAME} --no-worker`                |
-| Dream           | nightly at `DREAM_AT` (default 02:00)                     | `gbrain dream --dir /${SOURCE_NAME}` (wait on cycle lock)                        |
+| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s)                | s6 longrun: `gbrain autopilot --repo /source/brain --no-worker`                |
+| Dream           | nightly at `DREAM_AT` (default 02:00)                     | `gbrain dream --dir /source/brain` (wait on cycle lock)                        |
 | Doctor          | weekly on `DOCTOR_DAY` at `DOCTOR_AT` (default Mon 06:00) | `gbrain doctor --json` → `~/.gbrain/last-doctor.json`; remediate only if cap set |
 | Git push        | after a **successful autopilot-cycle**                    | only if `BRAIN_GIT_PUSH_URL` is set                                              |
 
@@ -43,10 +43,10 @@ Do this, then start or continue serve. Do **not** block HTTP on indexing.
 
 1. Wait for Postgres + `vector` extension.
 2. `gbrain init --url $DATABASE_URL --embedding-model ${EMBEDDING_MODEL:-ollama:embeddinggemma} --embedding-dimensions ${EMBEDDING_DIMENSIONS:-768} --non-interactive`.
-3. If `/${SOURCE_NAME}` exists and is not a git repo: `git init` and an initial commit as uid 99 / gid users.
-4. `git config --global --add safe.directory /${SOURCE_NAME}`.
-5. `gbrain sources add ${SOURCE_NAME} --path /${SOURCE_NAME} --name ${SOURCE_NAME}` and federate the source.
-6. Set file-plane `sync.repo_path` to `/${SOURCE_NAME}`.
+3. If `/source/brain` exists and is not a git repo: `git init` and an initial commit as uid 99 / gid users.
+4. `git config --global --add safe.directory /source/brain`.
+5. `gbrain sources add brain --path /source/brain --name brain` and federate the source.
+6. Set file-plane `sync.repo_path` to `/source/brain`.
 7. `gbrain schema use ${SCHEMA_PACK:-gbrain-everything}`.
 8. Write model routing (section 4) + `GBRAIN_EXTRA_CONFIG` into `config.json`.
 9. Mark `need-first-sync`, `need-first-doctor`, `need-graph-backfill`; enqueue a source-scoped **sync** job for the worker after serve is up; launch `gbrain-first-sync-post` detached.
@@ -58,7 +58,7 @@ Idempotent: if `config.json` exists, skip init. Re-register/federate only if the
 `gbrain-first-sync-post` (detached from `gbrain-http/run`):
 
 1. **First-boot doctor receipt**: one `gbrain doctor --json` → `last-doctor.json` once serve is healthy. Exam only.
-2. **Graph backfill**: waits for the recorded first-sync job to finish (or a 120s grace), then runs `gbrain extract links --source db --source-id ${SOURCE_NAME}` and `gbrain extract timeline --source db --source-id ${SOURCE_NAME}`. Both upstream commands are idempotent:
+2. **Graph backfill**: waits for the recorded first-sync job to finish (or a 120s grace), then runs `gbrain extract links --source db --source-id brain` and `gbrain extract timeline --source db --source-id brain`. Both upstream commands are idempotent:
    - **Preexisting repo** (XML brain path mapped to an existing share): populates `links` + `timeline_entries` per upstream Step 4.5 without waiting for pages to change.
    - **Fresh repo**: converges as no-ops; auto-link populates as pages are written.
 3. Marker-gated: runs once per brain. Restarts are no-ops. Failed sync → warning logged, markers persist for the next boot.
@@ -74,7 +74,7 @@ Autopilot must use `--no-worker` so it does not spawn a second worker.
 Start with the container. Wait for Postgres and `config.json`. Then:
 
 ```text
-gbrain autopilot --repo /${SOURCE_NAME} --interval ${AUTOPILOT_INTERVAL:-1800} --no-worker
+gbrain autopilot --repo /source/brain --interval ${AUTOPILOT_INTERVAL:-1800} --no-worker
 ```
 
 Do **not** use `gbrain autopilot --install` (that writes crontab; this image has no cron daemon).
@@ -104,7 +104,7 @@ Search mode note: keyless installs resolve `search.mode=conservative` (upstream 
 
 ## 5. Dream
 
-Nightly at `DREAM_AT` (default 02:00): `gbrain dream --dir /${SOURCE_NAME}`.
+Nightly at `DREAM_AT` (default 02:00): `gbrain dream --dir /source/brain`.
 
 Wait on the cycle lock. Do not add a second overlapping cycle.
 
@@ -170,7 +170,7 @@ Per-container Tailscale (Unraid 7 toggle): when a tailscaled socket exists, boot
 
 Required (no defaults): `POSTGRES_PASSWORD`, `GBRAIN_LAN_BIND`, `GBRAIN_ADMIN_BOOTSTRAP_TOKEN`. Paths + port always visible.
 
-Advanced / optional (empty = off or script default): `GBRAIN_PUBLIC_URL` (derived), `CHAT_PROVIDER`, `CHAT_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `SCHEMA_PACK`, `AUTOPILOT_INTERVAL`, `DREAM_AT`, `DOCTOR_DAY`, `DOCTOR_AT`, `TS_PUBLIC_URL`, `CERT_EXTRA_DNS`, `CERT_EXTRA_IPS`, `GBRAIN_EXTRA_CONFIG`, `OLLAMA_BASE_URL`, `SOURCE_NAME`, `BRAIN_UID/GID`, `BRAIN_GIT_PUSH_URL/TOKEN`, `DOCTOR_REMEDIATE_MAX_USD`, `SKILLOPT_ENABLED`, `NIGHTLY_QUALITY_PROBE`, `PARSER_PROBE_ENABLED`, vendor keys (Anthropic, OpenAI, Gemini, DeepSeek, Groq, OpenRouter, Voyage).
+Advanced / optional (empty = off or script default): `GBRAIN_PUBLIC_URL` (derived), `CHAT_PROVIDER`, `CHAT_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `SCHEMA_PACK`, `AUTOPILOT_INTERVAL`, `DREAM_AT`, `DOCTOR_DAY`, `DOCTOR_AT`, `TS_PUBLIC_URL`, `CERT_EXTRA_DNS`, `CERT_EXTRA_IPS`, `GBRAIN_EXTRA_CONFIG`, `OLLAMA_BASE_URL`, `BRAIN_UID/GID`, `BRAIN_GIT_PUSH_URL/TOKEN`, `DOCTOR_REMEDIATE_MAX_USD`, `SKILLOPT_ENABLED`, `NIGHTLY_QUALITY_PROBE`, `PARSER_PROBE_ENABLED`, vendor keys (Anthropic, OpenAI, Gemini, DeepSeek, Groq, OpenRouter, Voyage).
 
 Key contract: no key fields for providers whose recipes need no key (ollama); `TOGETHER_API_KEY` is script-managed.
 

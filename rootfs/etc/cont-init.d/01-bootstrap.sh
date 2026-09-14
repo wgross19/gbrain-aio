@@ -5,8 +5,9 @@ set -euo pipefail
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
-SOURCE_NAME="${SOURCE_NAME:-my-brain}"
-SOURCE_PATH="/${SOURCE_NAME}"
+# Option B: fixed mount target + neutral source id (source_path/source_name
+# in the lib are the single source of truth for downstream consumers).
+SOURCE_PATH="/source/brain"
 # --- Single appdata root: AIO_APPDATA (container path of the one host mount) --
 # Defaults preserve the legacy split layout when AIO_APPDATA is not set.
 AIO_APPDATA="${AIO_APPDATA-}"
@@ -145,7 +146,6 @@ GBRAIN_HTTP_BIND=${GBRAIN_HTTP_BIND:-127.0.0.1}
 GBRAIN_LAN_BIND=${GBRAIN_LAN_BIND}
 OLLAMA_API_KEY=${OLLAMA_API_KEY-}
 GBRAIN_PUBLIC_URL=${PUBLIC_URL}
-SOURCE_NAME=${SOURCE_NAME}
 CHAT_PROVIDER=${CHAT_PROVIDER-}
 CHAT_MODEL=${CHAT_MODEL:-deepseek-v4-flash:cloud}
 TOGETHER_API_KEY=${TOGETHER_KEY}
@@ -163,6 +163,37 @@ CERT_EXTRA_DNS=${CERT_EXTRA_DNS-}
 CERT_EXTRA_IPS=${CERT_EXTRA_IPS-}
 GBRAIN_EXTRA_CONFIG=${GBRAIN_EXTRA_CONFIG-}
 EOF
+
+# --- GBRAIN_EXTRA_ENV: env-only passthrough (closes the env-only gap) -------
+# Comma-separated KEY=VALUE pairs appended to runtime.env. Allowlist-only:
+# safety-critical gates stay out of reach of the catch-all.
+EXTRA_ENV="${GBRAIN_EXTRA_ENV-}"
+if [[ -n ${EXTRA_ENV} ]]; then
+	IFS=',' read -ra _PAIRS <<<"${EXTRA_ENV}"
+	for pair in "${_PAIRS[@]}"; do
+		pair="${pair#"${pair%%[![:space:]]*}"}"
+		pair="${pair%"${pair##*[![:space:]]}"}"
+		[[ -z ${pair} ]] && continue
+		KEY="${pair%%=*}"
+		case "${KEY}" in
+		GBRAIN_EMBEDDING_MULTIMODAL | GBRAIN_EMBEDDING_MULTIMODAL_MODEL | \
+			GBRAIN_EMBEDDING_IMAGE_OCR | GBRAIN_EMBEDDING_IMAGE_OCR_MODEL | \
+			GBRAIN_SEARCH_EXCLUDE | GBRAIN_SOURCE_BOOST | GBRAIN_CHAT_FALLBACK_CHAIN | \
+			GBRAIN_BACKUP_CHECK | GBRAIN_BACKUP_CHECK_DAYS | GBRAIN_AUTOPILOT_LABEL | \
+			GBRAIN_TRAJECTORY_REGRESSION_THRESHOLD | GBRAIN_EMBED_CONCURRENCY | \
+			GBRAIN_RETRIEVAL_REFLEX_VOLUNTEER | GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS) ;;
+		*)
+			log "error: GBRAIN_EXTRA_ENV refused '${KEY}' (not on the allowlist)"
+			exit 64
+			;;
+		esac
+		if printf '%s' "${pair}" | grep -q '[[:space:]]'; then
+			log "error: GBRAIN_EXTRA_ENV refused (contains whitespace): ${KEY}"
+			exit 64
+		fi
+		printf '%s\n' "${pair}" >>"${GBRAIN_HOME_DIR}/runtime.env"
+	done
+fi
 chown gbrain:users "${GBRAIN_HOME_DIR}/runtime.env"
 chmod 600 "${GBRAIN_HOME_DIR}/runtime.env"
 log "runtime env written (password not logged)"

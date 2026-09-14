@@ -130,7 +130,6 @@ def base_env() -> dict[str, str]:
         "GBRAIN_ADMIN_BOOTSTRAP_TOKEN": "testbootstrap123456789012345678901234",  # nosec B105 - test fixture
         "GBRAIN_LAN_BIND": "127.0.0.1",
         "GBRAIN_PUBLIC_URL": "https://127.0.0.1:3132",
-        "SOURCE_NAME": "test-brain",
         "BRAIN_UID": "99",
         "BRAIN_GID": "100",
     }
@@ -189,7 +188,7 @@ class DockerRuntime:
                 f"{caddy_volume}:/config/caddy",
             ]
             if brain_mount:
-                command.extend(["-v", f"{brain_mount}:/test-brain"])
+                command.extend(["-v", f"{brain_mount}:/source/brain"])
             env = dict(base_env())
             if env_overrides:
                 env.update(env_overrides)
