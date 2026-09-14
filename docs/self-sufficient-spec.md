@@ -28,8 +28,8 @@ Precedence: explicit env (XML) > existing `config.json` values on existing brain
 | Job             | When                                                      | Command / process                                                                |
 | --------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Jobs supervisor | always                                                    | existing `gbrain-worker` (`gbrain jobs supervisor --nice`)                       |
-| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s)                | s6 longrun: `gbrain autopilot --repo /source/brain --no-worker`                |
-| Dream           | nightly at `DREAM_AT` (default 02:00)                     | `gbrain dream --dir /source/brain` (wait on cycle lock)                        |
+| Autopilot       | every `AUTOPILOT_INTERVAL` (default 1800s)                | s6 longrun: `gbrain autopilot --repo /source/brain --no-worker`                  |
+| Dream           | nightly at `DREAM_AT` (default 02:00)                     | `gbrain dream --dir /source/brain` (wait on cycle lock)                          |
 | Doctor          | weekly on `DOCTOR_DAY` at `DOCTOR_AT` (default Mon 06:00) | `gbrain doctor --json` → `~/.gbrain/last-doctor.json`; remediate only if cap set |
 | Git push        | after a **successful autopilot-cycle**                    | only if `BRAIN_GIT_PUSH_URL` is set                                              |
 

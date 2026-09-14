@@ -287,7 +287,9 @@ def test_option_b_fixed_source_id_and_mount() -> None:
     assert "/source/brain" in lib, "mount target must be /source/brain"  # nosec B101
     tree = ET.parse(XML)  # nosec B406,B314  # own repo file, trusted source
     targets = {el.get("Target") for el in tree.iter("Config")}
-    assert "SOURCE_NAME" not in targets, "SOURCE_NAME must be gone (Option B)"  # nosec B101
+    assert (
+        "SOURCE_NAME" not in targets
+    ), "SOURCE_NAME must be gone (Option B)"  # nosec B101
     # brain path config mounts at the fixed target
     brain = [el for el in tree.iter("Config") if el.get("Name") == "Brain Path"]
     assert brain and brain[0].get("Target") == "/source/brain"  # nosec B101
@@ -309,5 +311,7 @@ def test_extra_env_allowlist_enforced_in_bootstrap() -> None:
         "GBRAIN_ALLOW_PRIVATE_REMOTES",
         "GBRAIN_ALLOW_UNVERIFIED_REMOTE",
     ):
-        banned_line = [l for l in s.splitlines() if banned in l and "refused" not in l]
+        banned_line = [
+            line for line in s.splitlines() if banned in line and "refused" not in line
+        ]
         assert not banned_line, f"{banned} must not be allowlisted"  # nosec B101
