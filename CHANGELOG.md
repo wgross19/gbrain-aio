@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 
 ### style
 
-- [[ ]] tests + SC1090 directives on dynamic runtime.env source
+- shell test brackets + SC1090 directives on dynamic runtime.env source
 
 - SC1090 directives on the remaining dynamic sources
 
