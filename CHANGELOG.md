@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.5 - 2026-09-16
+
+### Fixes
+
+- Runtime.env sourcing derives from AIO_APPDATA before GBRAIN_HOME exists
+
+### style
+
+- [[ ]] tests + SC1090 directives on dynamic runtime.env source
+
+- SC1090 directives on the remaining dynamic sources
+
 ## v0.50.0.0-aio.4 - 2026-09-14
 
 ### Features
