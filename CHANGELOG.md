@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.7 - 2026-09-16
+
+### Documentation
+
+- Reword changelog entry to avoid double-bracket pattern
+
 ## v0.50.0.0-aio.6 - 2026-09-16
 
 ### Documentation

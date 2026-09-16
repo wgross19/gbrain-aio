@@ -19,7 +19,7 @@ First run (details are in each field's help text):
 5. Trust the generated CA once.</Overview>
   <Changes>### 2026-09-16&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Avoid [[ ]] wiki-link pattern in changelog heading</Changes>
+- Reword changelog entry to avoid double-bracket pattern</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
