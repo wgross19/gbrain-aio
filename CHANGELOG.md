@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.6 - 2026-09-16
+
+### Documentation
+
+- Avoid [[ ]] wiki-link pattern in changelog heading
+
 ## v0.50.0.0-aio.5 - 2026-09-16
 
 ### Fixes

@@ -19,9 +19,7 @@ First run (details are in each field's help text):
 5. Trust the generated CA once.</Overview>
   <Changes>### 2026-09-16&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Runtime.env sourcing derives from AIO_APPDATA before GBRAIN_HOME exists&#xD;
-- [[ ]] tests + SC1090 directives on dynamic runtime.env source&#xD;
-- SC1090 directives on the remaining dynamic sources</Changes>
+- Avoid [[ ]] wiki-link pattern in changelog heading</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
