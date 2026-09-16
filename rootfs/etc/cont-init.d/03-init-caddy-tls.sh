@@ -11,12 +11,12 @@ log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 # cont-init runs; source it FIRST so the derived CERT_DIR (single appdata root)
 # and LAN_BIND/extras are visible. The literal fallback preserves the legacy
 # split layout for standalone installs without AIO_APPDATA.
-if [ -n "${AIO_APPDATA:-}" ]; then
+if [[ -n ${AIO_APPDATA-} ]]; then
 	RT="${AIO_APPDATA}/gbrain-home/runtime.env"
 else
 	RT="${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
 fi
-if [[ -f "${RT}" ]]; then
+if [[ -f ${RT} ]]; then
 	set -a
 	# shellcheck disable=SC1091
 	. "${RT}"

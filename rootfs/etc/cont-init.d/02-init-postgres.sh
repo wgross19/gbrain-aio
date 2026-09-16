@@ -6,12 +6,12 @@ set -euo pipefail
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
 # runtime.env (written by 01-bootstrap) carries the derived PGDATA/CERT_DIR/GBRAIN_HOME
-if [ -n "${AIO_APPDATA:-}" ]; then
+if [[ -n ${AIO_APPDATA-} ]]; then
 	RT="${AIO_APPDATA}/gbrain-home/runtime.env"
 else
 	RT="${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
 fi
-if [[ -f "${RT}" ]]; then
+if [[ -f ${RT} ]]; then
 	set -a
 	# shellcheck disable=SC1091
 	. "${RT}"

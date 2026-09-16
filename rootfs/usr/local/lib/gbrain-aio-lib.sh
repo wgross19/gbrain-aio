@@ -17,7 +17,7 @@ load_runtime() {
 # Container path of runtime.env, derived BEFORE runtime.env exists:
 # AIO_APPDATA (container env from the XML) -> gbrain-home; legacy fallback.
 aio_runtime_env() {
-	if [ -n "${AIO_APPDATA:-}" ]; then
+	if [[ -n ${AIO_APPDATA-} ]]; then
 		printf '%s' "${AIO_APPDATA}/gbrain-home/runtime.env"
 	else
 		printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
