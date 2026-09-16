@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- Avoid [[ ]] wiki-link pattern in changelog heading
+- Avoid double-bracket wiki-link pattern in changelog heading
 
 ## v0.50.0.0-aio.5 - 2026-09-16
 
