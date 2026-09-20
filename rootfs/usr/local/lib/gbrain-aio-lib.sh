@@ -46,8 +46,18 @@ doctor_at() {
 	printf '%s' "${DOCTOR_AT:-06:00}"
 }
 
+# gbrain home derived: AIO_APPDATA wins (single-root), then GBRAIN_HOME
+# (runtime.env value), then the Dockerfile-baked legacy default.
+aio_home() {
+	if [ -n "${AIO_APPDATA:-}" ]; then
+		printf '%s' "${AIO_APPDATA}/gbrain-home"
+	else
+		printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}"
+	fi
+}
+
 config_json() {
-	printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}/.gbrain/config.json"
+	printf '%s' "$(aio_home)/.gbrain/config.json"
 }
 
 is_on() {

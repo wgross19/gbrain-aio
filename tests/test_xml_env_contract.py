@@ -315,3 +315,12 @@ def test_extra_env_allowlist_enforced_in_bootstrap() -> None:
             line for line in s.splitlines() if banned in line and "refused" not in line
         ]
         assert not banned_line, f"{banned} must not be allowlisted"  # nosec B101
+
+
+def test_derived_paths_prefer_aio_appdata_over_baked_env() -> None:
+    """Dockerfile bakes ENV GBRAIN_HOME=/var/lib/gbrain into every process, so any
+    ${GBRAIN_HOME:-default} fallback is dead — AIO_APPDATA must win first."""
+    lib = LIB.read_text()
+    assert "aio_home()" in lib
+    # config_json must derive via aio_home, not a GBRAIN_HOME fallback
+    assert 'printf \'%s\' "$(aio_home)/.gbrain/config.json"' in lib
