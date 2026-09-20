@@ -324,3 +324,12 @@ def test_derived_paths_prefer_aio_appdata_over_baked_env() -> None:
     assert "aio_home()" in lib  # nosec B101
     # config_json must derive via aio_home, not a GBRAIN_HOME fallback
     assert "printf '%s' \"$(aio_home)/.gbrain/config.json\"" in lib  # nosec B101
+
+
+def test_load_runtime_uses_aio_runtime_env() -> None:
+    lib = LIB.read_text()
+    # load_runtime must source the derived path, not a GBRAIN_HOME fallback
+    # (Dockerfile bakes GBRAIN_HOME=/var/lib/gbrain, defeating any fallback).
+    body = lib[lib.index("load_runtime() {"):lib.index("source_name()")]
+    assert 'aio_runtime_env' in body, "load_runtime must use aio_runtime_env"
+    assert "GBRAIN_HOME:-/var/lib/gbrain" not in body, "baked-env fallback must be gone"

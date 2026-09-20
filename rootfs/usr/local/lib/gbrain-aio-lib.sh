@@ -6,24 +6,11 @@
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 
 load_runtime() {
-	if [[ -f "${GBRAIN_HOME:-/var/lib/gbrain}"/runtime.env ]]; then
-		set -a
-		# shellcheck disable=SC1091
-		. "${GBRAIN_HOME:-/var/lib/gbrain}"/runtime.env
-		set +a
-	fi
+	set -a
+	# shellcheck disable=SC1090,SC1091
+	. "$(aio_runtime_env)"
+	set +a
 }
-
-# Container path of runtime.env, derived BEFORE runtime.env exists:
-# AIO_APPDATA (container env from the XML) -> gbrain-home; legacy fallback.
-aio_runtime_env() {
-	if [[ -n ${AIO_APPDATA-} ]]; then
-		printf '%s' "${AIO_APPDATA}/gbrain-home/runtime.env"
-	else
-		printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
-	fi
-}
-
 source_name() {
 	# Option B: neutral fixed source id. Mount target is /source/brain; the
 	# source id, mount name, and basename are one and the same by design.
@@ -54,6 +41,10 @@ aio_home() {
 	else
 		printf '%s' "${GBRAIN_HOME:-/var/lib/gbrain}"
 	fi
+}
+
+aio_runtime_env() {
+	printf '%s' "$(aio_home)/runtime.env"
 }
 
 config_json() {
