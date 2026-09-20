@@ -17,9 +17,9 @@ First run (details are in each field's help text):
 3. Set Brain Path to an empty folder.
 4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
 5. Trust the generated CA once.</Overview>
-  <Changes>### 2026-09-16&#xD;
+  <Changes>### 2026-09-20&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Reword changelog entry to avoid double-bracket pattern</Changes>
+- Caddy + postgres run scripts source runtime.env (AIO_APPDATA-derived)</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>

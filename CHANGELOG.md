@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.8 - 2026-09-20
+
+### Fixes
+
+- Caddy + postgres run scripts source runtime.env (AIO_APPDATA-derived)
+
 ## v0.50.0.0-aio.7 - 2026-09-16
 
 ### Documentation
