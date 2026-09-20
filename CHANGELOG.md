@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.9 - 2026-09-20
+
+### Fixes
+
+- Aio_home() — AIO_APPDATA must win over the Dockerfile-baked GBRAIN_HOME
+
+### style
+
+- Bracket + nosec on contract additions
+
+- Shfmt variable form in aio_home
+
 ## v0.50.0.0-aio.8 - 2026-09-20
 
 ### Fixes
