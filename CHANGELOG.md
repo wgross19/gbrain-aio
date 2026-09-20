@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.11 - 2026-09-20
+
+### Fixes
+
+- BRAIN_UID default 999 -> 99 (runtime user mismatch)
+
 ## v0.50.0.0-aio.10 - 2026-09-20
 
 ### Fixes
