@@ -49,7 +49,7 @@ install -d -m 0755 "${GBRAIN_HOME_DIR}" "${POSTGRES_DATA}" /run/postgresql "${CA
 chown -R postgres:postgres "${POSTGRES_DATA}" /run/postgresql
 chown -R gbrain:users "${GBRAIN_HOME_DIR}"
 if [[ -d ${SOURCE_PATH} ]]; then
-	BRAIN_UID="${BRAIN_UID:-999}"
+	BRAIN_UID="${BRAIN_UID:-99}"
 	BRAIN_GID="${BRAIN_GID:-100}"
 	case "${BRAIN_UID}${BRAIN_GID}" in
 	*[!0-9]*)
