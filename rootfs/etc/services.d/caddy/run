@@ -3,8 +3,19 @@
 set -euo pipefail
 
 # Render the Caddyfile with the runtime cert paths, then run Caddy.
-# AIO_APPDATA single-root installs carry CERT_DIR in runtime.env (sourced by
-# with-contenv); legacy split installs fall back to the baked paths.
+# AIO_APPDATA single-root installs carry CERT_DIR in runtime.env — source it
+# explicitly (with-contenv only carries container env). Legacy fallback second.
+if [ -n "${AIO_APPDATA:-}" ]; then
+	RT="${AIO_APPDATA}/gbrain-home/runtime.env"
+else
+	RT="${GBRAIN_HOME:-/var/lib/gbrain}/runtime.env"
+fi
+if [ -f "${RT}" ]; then
+	set -a
+	# shellcheck disable=SC1090,SC1091
+	. "${RT}"
+	set +a
+fi
 CERT_DIR="${CERT_DIR:-/config/caddy/certs}"
 
 sed -e "s|__CERT_DIR__|${CERT_DIR}|g" /etc/caddy/Caddyfile.template >/etc/caddy/Caddyfile
