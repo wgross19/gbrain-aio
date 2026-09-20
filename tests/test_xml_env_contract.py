@@ -330,6 +330,10 @@ def test_load_runtime_uses_aio_runtime_env() -> None:
     lib = LIB.read_text()
     # load_runtime must source the derived path, not a GBRAIN_HOME fallback
     # (Dockerfile bakes GBRAIN_HOME=/var/lib/gbrain, defeating any fallback).
-    body = lib[lib.index("load_runtime() {"):lib.index("source_name()")]
-    assert 'aio_runtime_env' in body, "load_runtime must use aio_runtime_env"
-    assert "GBRAIN_HOME:-/var/lib/gbrain" not in body, "baked-env fallback must be gone"
+    body = lib[lib.index("load_runtime() {") : lib.index("source_name()")]
+    assert (  # nosec B101
+        "aio_runtime_env" in body
+    ), "load_runtime must use aio_runtime_env"
+    assert (  # nosec B101
+        "GBRAIN_HOME:-/var/lib/gbrain" not in body
+    ), "baked-env fallback must be gone"
