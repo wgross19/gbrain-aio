@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.50.0.0-aio.10 - 2026-09-20
+
+### Fixes
+
+- Load_runtime sources aio_runtime_env (the real loop root)
+
+### style
+
+- Nosec on multi-line contract asserts
+
 ## v0.50.0.0-aio.9 - 2026-09-20
 
 ### Fixes

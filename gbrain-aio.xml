@@ -19,9 +19,8 @@ First run (details are in each field's help text):
 5. Trust the generated CA once.</Overview>
   <Changes>### 2026-09-20&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Aio_home() — AIO_APPDATA must win over the Dockerfile-baked GBRAIN_HOME&#xD;
-- Bracket + nosec on contract additions&#xD;
-- Shfmt variable form in aio_home</Changes>
+- Load_runtime sources aio_runtime_env (the real loop root)&#xD;
+- Nosec on multi-line contract asserts</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
