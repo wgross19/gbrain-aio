@@ -287,7 +287,7 @@ def test_option_b_fixed_source_id_and_mount() -> None:
     assert "/source/brain" in lib, "mount target must be /source/brain"  # nosec B101
     tree = ET.parse(XML)  # nosec B406,B314  # own repo file, trusted source
     targets = {el.get("Target") for el in tree.iter("Config")}
-    assert (
+    assert (  # nosec B101
         "SOURCE_NAME" not in targets
     ), "SOURCE_NAME must be gone (Option B)"  # nosec B101
     # brain path config mounts at the fixed target
@@ -321,6 +321,6 @@ def test_derived_paths_prefer_aio_appdata_over_baked_env() -> None:
     """Dockerfile bakes ENV GBRAIN_HOME=/var/lib/gbrain into every process, so any
     ${GBRAIN_HOME:-default} fallback is dead — AIO_APPDATA must win first."""
     lib = LIB.read_text()
-    assert "aio_home()" in lib
+    assert "aio_home()" in lib  # nosec B101
     # config_json must derive via aio_home, not a GBRAIN_HOME fallback
-    assert 'printf \'%s\' "$(aio_home)/.gbrain/config.json"' in lib
+    assert "printf '%s' \"$(aio_home)/.gbrain/config.json\"" in lib  # nosec B101
