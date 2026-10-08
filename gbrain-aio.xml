@@ -17,9 +17,10 @@ First run (details are in each field's help text):
 3. Set Brain Path to an empty folder.
 4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
 5. Trust the generated CA once.</Overview>
-  <Changes>### 2026-09-20&#xD;
+  <Changes>### 2026-10-08&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- BRAIN_UID default 999 -&gt; 99 (runtime user mismatch)</Changes>
+- Bump GBrain to v0.60.110.0 and Bun 1.4.2 (#61)&#xD;
+- Bump gbrain to v0.60.113.0 (#63)</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>

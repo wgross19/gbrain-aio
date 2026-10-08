@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.60.113.0-aio.1 - 2026-10-08
+
+### Maintenance
+
+- Bump GBrain to v0.60.110.0 and Bun 1.4.2 (#61)
+
+- Bump gbrain to v0.60.113.0 (#63)
+
 ## v0.50.0.0-aio.11 - 2026-09-20
 
 ### Fixes
