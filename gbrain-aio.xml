@@ -11,12 +11,16 @@
   <Project>https://github.com/wgross19/gbrain-aio</Project>
   <Overview>GBrain all-in-one for Unraid: a hosted knowledge base and MCP server for AI agents (Hermes Agent, OpenClaw, Codex). One container runs GBrain, PostgreSQL 17 + pgvector, Caddy TLS, and the job supervisor. Agents connect over HTTPS — Postgres is never exposed.
 
+Basic/default setup: follow the five first-run steps below and leave optional advanced fields at their defaults. The container includes PostgreSQL and Caddy TLS, and starts the job supervisor.
+
 First run (details are in each field's help text):
 1. Set Postgres Password and Admin Bootstrap Token.
-2. Set LAN Bind and Public URL to your host IP.
+2. Set LAN Bind to your host IP. Leave Public URL empty to derive the LAN HTTPS address, unless you use a custom port, DNS name, reverse proxy, or Tailscale origin.
 3. Set Brain Path to an empty folder.
 4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
-5. Trust the generated CA once.</Overview>
+5. Trust the generated CA once.
+
+Advanced configuration is optional. The advanced fields support provider and embedding settings, schema selection, maintenance schedules, TLS origin, Git push, and extra runtime configuration.</Overview>
   <Changes>### 2026-10-08&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Bump GBrain to v0.60.110.0 and Bun 1.4.2 (#61)&#xD;
