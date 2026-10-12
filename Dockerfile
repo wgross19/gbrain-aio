@@ -56,8 +56,10 @@ RUN apt-get update \
     postgresql-${POSTGRES_MAJOR} \
     postgresql-${POSTGRES_MAJOR}-pgvector \
     postgresql-client-${POSTGRES_MAJOR} \
+  && S6_ARCH="$(dpkg --print-architecture)" \
+  && case "${S6_ARCH}" in amd64) S6_UNAME=x86_64 ;; arm64) S6_UNAME=aarch64 ;; *) echo >&2 "unsupported architecture: ${S6_ARCH}"; exit 1 ;; esac \
   && curl -fsSL "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" -o /tmp/s6-noarch.tar.xz \
-  && curl -fsSL "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz" -o /tmp/s6-arch.tar.xz \
+  && curl -fsSL "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_UNAME}.tar.xz" -o /tmp/s6-arch.tar.xz \
   && tar -C / -Jxpf /tmp/s6-noarch.tar.xz \
   && tar -C / -Jxpf /tmp/s6-arch.tar.xz \
   && rm -f /tmp/s6-noarch.tar.xz /tmp/s6-arch.tar.xz \
