@@ -28,7 +28,11 @@ def runtime() -> DockerRuntime:
 
 
 # --- 1. Image starts successfully -------------------------------------------
+@pytest.mark.timeout(300)
 def test_image_starts_and_reaches_internal_health(runtime: DockerRuntime) -> None:
+    # The session fixture builds the image during THIS test, and first boot
+    # runs init + first sync; the fleet's --timeout=90 default cap fits later
+    # tests (warm image), not the cold first one.
     with runtime.container() as c:
         c.wait_for_internal_health()
         assert c.is_running()  # nosec B101
