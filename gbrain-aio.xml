@@ -21,10 +21,13 @@ First run (details are in each field's help text):
 5. Trust the generated CA once.
 
 Advanced configuration is optional. The advanced fields support provider and embedding settings, schema selection, maintenance schedules, TLS origin, Git push, and extra runtime configuration.</Overview>
-  <Changes>### 2026-10-08&#xD;
+  <Changes>### 2026-11-04&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Bump GBrain to v0.60.110.0 and Bun 1.4.2 (#61)&#xD;
-- Bump gbrain to v0.60.113.0 (#63)</Changes>
+- Clarify catalog setup guidance (#65)&#xD;
+- Install the s6-overlay tarball for the build arch so arm64 boots&#xD;
+- Bump gbrain to v0.60.492.0 (#86)&#xD;
+- Bump gbrain to v0.60.528.0 (#87)&#xD;
+- Bump gbrain to v0.60.565.0 (#90)</Changes>
   <Category>AI Tools:Utilities</Category>
   <WebUI>https://[IP]:[PORT:3132]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/wgross19/awesome-unraid/main/gbrain-aio.xml</TemplateURL>
