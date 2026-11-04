@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.60.565.0-aio.1 - 2026-11-04
+
+### Documentation
+
+- Clarify catalog setup guidance (#65)
+
+### Fixes
+
+- Install the s6-overlay tarball for the build arch so arm64 boots
+
+### Maintenance
+
+- Bump gbrain to v0.60.492.0 (#86)
+
+- Bump gbrain to v0.60.528.0 (#87)
+
+- Bump gbrain to v0.60.565.0 (#90)
+
 ## v0.60.113.0-aio.1 - 2026-10-08
 
 ### Maintenance
