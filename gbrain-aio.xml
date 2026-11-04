@@ -20,7 +20,17 @@ First run (details are in each field's help text):
 4. Start, then open https://&lt;lan&gt;:3132/admin/ and paste the token.
 5. Trust the generated CA once.
 
-Advanced configuration is optional. The advanced fields support provider and embedding settings, schema selection, maintenance schedules, TLS origin, Git push, and extra runtime configuration.</Overview>
+Advanced configuration is optional. The advanced fields support provider and embedding settings, schema selection, maintenance schedules, TLS origin, Git push, and extra runtime configuration.
+
+STORAGE MODEL (v0.60 single-root layout). ALL persistent state lives in the one Appdata Root folder you choose. The container creates three sub-folders inside it: data/postgres (database), gbrain-home (config, runtime.env, OAuth clients), and caddy (TLS cert plus generated CA). Point Appdata Root only at a folder that holds this app. Keep the same folder across updates and reinstalls; the brain follows the folder.
+
+UPGRADING FROM v0.50 OR EARLIER TEMPLATES. Older releases kept the database, GBrain home, and TLS certs in container-internal or separate mounts. v0.60 keeps everything under the Appdata Root sub-folders and adopts existing data on first boot when the old locations still hold content. On the refreshed template this is controlled by the Appdata Mode variable at its default /data/aio. Before you update: back up the Appdata folder, save a copy of your template field values, keep the Appdata folder path unchanged, and expect the first boot to run database migrations.
+
+TROUBLESHOOTING AFTER AN UPDATE. Never delete the old container or its images while debugging; that is where recoverable copies of state live.
+
+- Log loops on "/config/caddy/certs/cert.pem" or "/data/postgres/postgresql.conf: No such file", Caddy and Postgres restart every second: the container did not boot the true published image (a stale local image answered the update). List what the host holds with: docker images -a | grep gbrain. Remove stale local builds, keep the Appdata folder as is, then run the update again from the Applications tab.
+- Container healthy but the brain looks EMPTY: the Appdata Mode variable was missing on boot, so state landed in throwaway volumes. Find them with docker volume ls --filter dangling=true and docker volume inspect. Copy the old database volume into the Appdata folder: docker run --rm -v &lt;old volume&gt;:/src -v &lt;Appdata Root&gt;:/dst alpine sh -c 'cp -a /src/. /dst/data/postgres'. Repeat for a leftover cert volume into /dst/caddy. Then restart the container.
+- First boot refuses with "Refusing to silently re-template" or a vector dimension error: the embedding width changed versus the existing brain. Set Embedding Dimensions to the previous brain width (768 for the default embeddinggemma setup) and restart. Do not delete data unless a fresh start is intended.</Overview>
   <Changes>### 2026-11-04&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Clarify catalog setup guidance (#65)&#xD;
@@ -67,6 +77,7 @@ Advanced configuration is optional. The advanced fields support provider and emb
 
   <Config Name="Web UI Port" Target="3132" Default="3132" Mode="tcp" Description="Published HTTPS port (Caddy)." Type="Port" Display="always" Required="true" Mask="false">3132</Config>
   <Config Name="Appdata Root" Target="/data/aio" Default="/mnt/user/appdata/gbrain-aio" Mode="rw" Description="Single persistent folder. Sub-folders are created automatically: data/postgres (database), gbrain-home (config, OAuth, runtime.env), caddy (TLS certs + CA)." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gbrain-aio</Config>
+  <Config Name="Appdata Mode" Target="AIO_APPDATA" Default="/data/aio" Mode="" Description="Internal state root (advanced). Keep /data/aio: the single Appdata Root mount and its auto-created sub-folders (data/postgres, gbrain-home, caddy) depend on it. An empty or changed value makes the container use throwaway internal volumes that are wiped on every update." Type="Variable" Display="advanced" Required="false" Mask="false">/data/aio</Config>
   <Config Name="Brain Path" Target="/source/brain" Default="/mnt/user/my-brain" Mode="rw" Description="Host path to the brain markdown repo. Mounted at the fixed target /source/brain; the source id is fixed to 'brain'. Should be an empty folder (or a git repo) that GBrain will initialize." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/my-brain</Config>
   <Config Name="Postgres User" Target="POSTGRES_USER" Default="gbrain" Mode="" Description="Postgres superuser. Keep gbrain." Type="Variable" Display="advanced" Required="false" Mask="false">gbrain</Config>
   <Config Name="Postgres Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="REQUIRED. Alphanumeric only (A-Za-z0-9). Secret. Example: mypass123. Generate: head -c 16 /dev/urandom | base64 | tr -d '+/=' | head -c 16" Type="Variable" Display="always" Required="true" Mask="true"/>
