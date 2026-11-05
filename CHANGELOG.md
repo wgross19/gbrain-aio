@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.60.574.0-aio.1 - 2026-11-05
+
+### Fixes
+
+- V0.60 single-root template refresh (#92)
+
+- Pin initdb to UTF8 + source single-root runtime.env in the CLI wrapper (#94)
+
+### Maintenance
+
+- Bump gbrain to v0.60.574.0 (#93)
+
 ## v0.60.565.0-aio.1 - 2026-11-04
 
 ### Documentation
