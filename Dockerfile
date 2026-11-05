@@ -73,7 +73,6 @@ COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 COPY --from=caddy /usr/bin/caddy /usr/bin/caddy
 
 WORKDIR /opt/gbrain
-# trunk-ignore hadolint/SC2016
 RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && git -C /tmp/gbrain-src checkout --detach "${GBRAIN_GIT_SHA}" \
   && test "$(git -C /tmp/gbrain-src rev-parse HEAD)" = "${GBRAIN_GIT_SHA}" \
@@ -82,8 +81,6 @@ RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && rm -rf /tmp/gbrain-src \
   && bun install --frozen-lockfile \
   && chown -R gbrain:users /opt/gbrain \
-  && printf '%s\n' '#!/bin/sh' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'if [ -f "${AIO_APPDATA}/gbrain-home/runtime.env" ]; then set -a; . "${AIO_APPDATA}/gbrain-home/runtime.env"; set +a; fi' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'exec bun run /opt/gbrain/src/cli.ts "$@"' > /usr/local/bin/gbrain \
-  && chmod 755 /usr/local/bin/gbrain
 
 COPY rootfs/ /
 RUN chmod 755 /etc/cont-init.d/* /etc/services.d/*/run /usr/local/bin/* /usr/local/lib/gbrain-aio-lib.sh

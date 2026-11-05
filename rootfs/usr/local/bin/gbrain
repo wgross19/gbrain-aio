@@ -1,0 +1,8 @@
+#!/bin/sh
+# gbrain CLI launcher. Sources the runtime env so docker-exec calls see the
+# database URL under the single appdata root first, then the legacy split path.
+# shellcheck shell=sh
+# shellcheck disable=SC1090,SC1091
+if [ -f "${AIO_APPDATA}/gbrain-home/runtime.env" ]; then set -a; . "${AIO_APPDATA}/gbrain-home/runtime.env"; set +a; fi
+if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . "/var/lib/gbrain/runtime.env"; set +a; fi
+exec bun run /opt/gbrain/src/cli.ts "$@"
