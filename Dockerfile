@@ -80,7 +80,7 @@ RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && cp -a /tmp/gbrain-src/. /opt/gbrain/ \
   && rm -rf /tmp/gbrain-src \
   && bun install --frozen-lockfile \
-  && chown -R gbrain:users /opt/gbrain \
+  && chown -R gbrain:users /opt/gbrain 
 
 COPY rootfs/ /
 RUN chmod 755 /etc/cont-init.d/* /etc/services.d/*/run /usr/local/bin/* /usr/local/lib/gbrain-aio-lib.sh
