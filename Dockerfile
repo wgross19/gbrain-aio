@@ -73,6 +73,7 @@ COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 COPY --from=caddy /usr/bin/caddy /usr/bin/caddy
 
 WORKDIR /opt/gbrain
+# trunk-ignore hadolint/SC2016
 RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && git -C /tmp/gbrain-src checkout --detach "${GBRAIN_GIT_SHA}" \
   && test "$(git -C /tmp/gbrain-src rev-parse HEAD)" = "${GBRAIN_GIT_SHA}" \
