@@ -26,7 +26,11 @@ chown -R postgres:postgres "${PGDATA}" /run/postgresql
 
 if [[ ! -s "${PGDATA}/PG_VERSION" ]]; then
 	log "initializing empty PostgreSQL data dir"
-	gosu postgres /usr/lib/postgresql/17/bin/initdb -D "${PGDATA}" --auth-local=peer --auth-host=scram-sha-256 --username=postgres
+	# Pin UTF8 + locale C: gbrain v0.60+ migrations and text functions assume a
+	# UTF8 cluster. Locale C + UTF8 is the deterministic pair on this image.
+	# A LANG=C host used to produce SQL_ASCII clusters, which mangles multibyte
+	# text in translate()/lower() pipelines and breaks fingerprint migrations.
+	gosu postgres /usr/lib/postgresql/17/bin/initdb -D "${PGDATA}" --auth-local=peer --auth-host=scram-sha-256 --username=postgres --encoding=UTF8 --locale=C
 fi
 
 install -d -m 0755 "${PGDATA}/conf.d"
