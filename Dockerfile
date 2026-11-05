@@ -81,7 +81,7 @@ RUN git clone --filter=blob:none "${GBRAIN_REPO}" /tmp/gbrain-src \
   && rm -rf /tmp/gbrain-src \
   && bun install --frozen-lockfile \
   && chown -R gbrain:users /opt/gbrain \
-  && printf '%s\n' '#!/bin/sh' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'exec bun run /opt/gbrain/src/cli.ts "$@"' > /usr/local/bin/gbrain \
+  && printf '%s\n' '#!/bin/sh' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'if [ -f "${AIO_APPDATA}/gbrain-home/runtime.env" ]; then set -a; . "${AIO_APPDATA}/gbrain-home/runtime.env"; set +a; fi' 'if [ -f /var/lib/gbrain/runtime.env ]; then set -a; . /var/lib/gbrain/runtime.env; set +a; fi' 'exec bun run /opt/gbrain/src/cli.ts "$@"' > /usr/local/bin/gbrain \
   && chmod 755 /usr/local/bin/gbrain
 
 COPY rootfs/ /
