@@ -58,6 +58,14 @@ if [[ -d ${SOURCE_PATH} ]]; then
 		;;
 	esac
 	chown -R "${BRAIN_UID}:${BRAIN_GID}" "${SOURCE_PATH}" || log "warn: could not chown ${SOURCE_PATH}"
+	git config --system --add safe.directory '*' || true
+	gosu gbrain env HOME="${GBRAIN_HOME_DIR}" git config --global --add safe.directory '*' || true
+	if [[ -f "${GBRAIN_HOME_DIR}/.gbrain/persistence/source-parent-reservation.json" ]]; then
+		cp -f "${GBRAIN_HOME_DIR}/.gbrain/persistence/source-parent-reservation.json" \
+			"/source/.gbrain-owner-666f24e3cc25cba9dbec41afea20ea7f7265a0c3878c3ed7d813626e1cb65bda.json"
+		chown "${BRAIN_UID}:${BRAIN_GID}" "/source/.gbrain-owner-666f24e3cc25cba9dbec41afea20ea7f7265a0c3878c3ed7d813626e1cb65bda.json" || true
+		chmod 600 "/source/.gbrain-owner-666f24e3cc25cba9dbec41afea20ea7f7265a0c3878c3ed7d813626e1cb65bda.json" || true
+	fi
 fi
 
 if [[ -z ${POSTGRES_PASSWORD-} ]]; then

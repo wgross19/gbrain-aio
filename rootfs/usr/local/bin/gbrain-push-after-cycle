@@ -42,9 +42,19 @@ push_brain() {
       commit -m "gbrain autopilot-cycle"
   fi
   if [ -n "${BRAIN_GIT_PUSH_TOKEN:-}" ]; then
-    gbrain_as git -C "${PATH_BRAIN}" \
-      -c "http.extraHeader=Authorization: Bearer ${BRAIN_GIT_PUSH_TOKEN}" \
-      push origin HEAD
+    case "${BRAIN_GIT_PUSH_URL}" in
+    *github.com*)
+      b64="$(printf 'x-access-token:%s' "${BRAIN_GIT_PUSH_TOKEN}" | base64 -w0)"
+      gbrain_as git -C "${PATH_BRAIN}" \
+        -c "http.extraHeader=Authorization: Basic ${b64}" \
+        push origin HEAD
+      ;;
+    *)
+      gbrain_as git -C "${PATH_BRAIN}" \
+        -c "http.extraHeader=Authorization: Bearer ${BRAIN_GIT_PUSH_TOKEN}" \
+        push origin HEAD
+      ;;
+    esac
   else
     gbrain_as git -C "${PATH_BRAIN}" push origin HEAD
   fi

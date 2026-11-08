@@ -63,6 +63,9 @@ if (existsSync(configPath)) {
 cfg.embedding_model = (process.env.EMBEDDING_MODEL || "").trim() || "ollama:embeddinggemma";
 const dimsRaw = (process.env.EMBEDDING_DIMENSIONS || "").trim();
 cfg.embedding_dimensions = Number.parseInt(dimsRaw, 10) || 768;
+if (cfg.embedding_model === "ollama:embeddinggemma" && !cfg.embedding_query_prefix) {
+  cfg.embedding_query_prefix = "task: search result | query: ";
+}
 
 if (sourcePath) {
   const sync = asRecord(cfg.sync);
@@ -149,11 +152,27 @@ if (applyChatGated) {
   parser.llm_fallback_enabled = true;
   cfg.conversation_parser = parser;
 
+  const agentCfg = asRecord(cfg.agent);
+  agentCfg.use_gateway_loop = true;
+  cfg.agent = agentCfg;
+
+  const linkRes = asRecord(cfg.link_resolution);
+  linkRes.global_basename = true;
+  cfg.link_resolution = linkRes;
+
+  const persist = asRecord(cfg.persistence);
+  persist.single_consumer = true;
+  cfg.persistence = persist;
+
   dbFlags["dream.drift.enabled"] = "true";
   dbFlags["cycle.enrich_thin.enabled"] = "true";
   dbFlags["cycle.conversation_facts_backfill.enabled"] = "true";
   dbFlags["cycle.grade_takes.auto_resolve.enabled"] = "true";
   dbFlags["conversation_parser.llm_fallback_enabled"] = "true";
+  dbFlags["agent.use_gateway_loop"] = "true";
+  dbFlags["link_resolution.global_basename"] = "true";
+  dbFlags["persistence.single_consumer"] = "true";
+  dbFlags["autopilot.fanout_max_per_tick"] = "1";
 }
 
 if (isOn(process.env.SKILLOPT_ENABLED)) {
