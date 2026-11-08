@@ -134,6 +134,35 @@ if (applyChatGated) {
   dream.drift = drift;
   cfg.dream = dream;
 
+  // --- 4-tier model split (cost-optimized Ollama Cloud defaults) --------------
+  // utility (triage/atoms/synopsis): mimo-v2.6-flash (1M ctx, $0.14/$0.0028/$0.28)
+  // expansion (query rewrite): beam ($0.125/$0.015/$0.40, token-efficient)
+  // reasoning + facts (chat/drift/JSON): CHAT_MODEL (glm-5.3-flash default; GLM
+  //   thinking-headroom rule in recipes/ollama.ts protects JSON fences)
+  // deep (synthesize/patterns/think): deepseek-v4.1-flash (763B, 1M ctx; Dream
+  //   runs at 02:00 = Ollama Cloud off-peak $0.15/$0.003/$0.60)
+  // Only set each tier when the operator has not pinned it already (first boot).
+  const models = asRecord(cfg.models);
+  const tiers = asRecord(models.tier);
+  if (tiers.utility === undefined) {
+    tiers.utility = "ollama:mimo-v2.6-flash:cloud";
+    dbFlags["models.tier.utility"] = "ollama:mimo-v2.6-flash:cloud";
+  }
+  if (tiers.reasoning === undefined) {
+    tiers.reasoning = `ollama:${chatModelName}`;
+    dbFlags["models.tier.reasoning"] = `ollama:${chatModelName}`;
+  }
+  if (tiers.deep === undefined) {
+    tiers.deep = "ollama:deepseek-v4.1-flash:cloud";
+    dbFlags["models.tier.deep"] = "ollama:deepseek-v4.1-flash:cloud";
+  }
+  models.tier = tiers;
+  if (models.expansion === undefined) {
+    models.expansion = "ollama:beam:cloud";
+    dbFlags["models.expansion"] = "ollama:beam:cloud";
+  }
+  cfg.models = models;
+
   const cycle = asRecord(cfg.cycle);
   const enrich = asRecord(cycle.enrich_thin);
   enrich.enabled = true;
