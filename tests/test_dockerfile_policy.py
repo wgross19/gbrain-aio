@@ -164,9 +164,7 @@ def test_dockerfile_runs_gbrain_as_unraid_99_100() -> None:
     dockerfile = _dockerfile()
     assert "useradd --system --uid 99 --gid users" in dockerfile  # nosec B101
     non_pin_lines = "\n".join(
-        ln
-        for ln in dockerfile.splitlines()
-        if not ln.lstrip().startswith("ARG ")
+        ln for ln in dockerfile.splitlines() if not ln.lstrip().startswith("ARG ")
     )
     assert "999" not in non_pin_lines  # nosec B101
     # chown targets must use the users group, not a gbrain group.
