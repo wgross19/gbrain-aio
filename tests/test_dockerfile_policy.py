@@ -153,10 +153,20 @@ def test_dockerfile_runs_gbrain_as_unraid_99_100() -> None:
     The brain bind mount is owned by 99:100 on Unraid. If gbrain runs as a
     different uid/gid it cannot read 640-permission files in the brain,
     causing EACCES during sync. This guards against regressing to 999.
+
+    ARG values are upstream pins (git shas, versions, image digests) that can
+    legitimately contain any digits: GBRAIN_GIT_SHA a1164052...c5c509995
+    broke a bare whole-file substring search on "999" during the
+    v0.60.712.0 bump (GST false positive). No identity selector is an ARG --
+    the runtime uid/gid is fixed by the useradd RUN line asserted below -- so
+    the "999" guard scans everything except ARG pin lines.
     """
     dockerfile = _dockerfile()
     assert "useradd --system --uid 99 --gid users" in dockerfile  # nosec B101
-    assert "999" not in dockerfile  # nosec B101
+    non_pin_lines = "\n".join(
+        ln for ln in dockerfile.splitlines() if not ln.lstrip().startswith("ARG ")
+    )
+    assert "999" not in non_pin_lines  # nosec B101
     # chown targets must use the users group, not a gbrain group.
     assert "gbrain:users" in dockerfile  # nosec B101
     assert "gbrain:gbrain" not in dockerfile  # nosec B101
