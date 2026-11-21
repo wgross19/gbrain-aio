@@ -30,10 +30,12 @@ def runtime() -> DockerRuntime:
 
 
 @pytest.mark.timeout(2400)
-def test_release_upgrade_qualification(request: pytest.FixtureRequest, tmp_path: Path, capsys) -> None:
+def test_release_upgrade_qualification(
+    request: pytest.FixtureRequest, tmp_path: Path, capsys
+) -> None:
     """Run on the existing fleet integration entrypoint, including pre-publish validation."""
     verify_release_daemon()
-    request.getfixturevalue('runtime')
+    request.getfixturevalue("runtime")
     with capsys.disabled():
         qualify(IMAGE_TAG, tmp_path)
 

@@ -4,6 +4,7 @@ The suite runs ONCE per pytest session: strict inputs first (no Docker call
 may happen before they validate), then the old->candidate choreography on the
 verified DinD daemon, whose receipts every test in this directory asserts on.
 """
+
 from __future__ import annotations
 
 import os

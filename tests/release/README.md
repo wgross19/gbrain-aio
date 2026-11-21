@@ -41,10 +41,10 @@ The fleet already selects `tests/integration -m integration`. Its `test_release_
 
 Every release run includes **two independent existing-install fixtures** in `test_release_reservation.py`. Both first prove a real write on the previous image with synthetic data and the template mounts. No preparation runs on the replacement.
 
-| Starting state | Required immediately after replacement AND after restart | Verdict meaning |
-| --- | --- | --- |
-| Matching parent reservation saved in appdata on the old container | Candidate restores the original marker; new writes succeed through the app and on disk | Writable upgrade for this starting state only |
-| Legacy install without the saved reservation | A new write specifically reports checkout `recovery_required`; no page file or row appears | Safety control, **not** a successful legacy migration |
+| Starting state                                                    | Required immediately after replacement AND after restart                                   | Verdict meaning                                       |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| Matching parent reservation saved in appdata on the old container | Candidate restores the original marker; new writes succeed through the app and on disk     | Writable upgrade for this starting state only         |
+| Legacy install without the saved reservation                      | A new write specifically reports checkout `recovery_required`; no page file or row appears | Safety control, **not** a successful legacy migration |
 
 If the product adds verified recovery for legacy installs, review and update that contract explicitly. Do not replace it with a skip. Blank-folder first installs and live Unraid qualification are separate cases.
 

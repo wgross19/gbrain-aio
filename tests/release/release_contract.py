@@ -8,6 +8,7 @@ daemon exists).
 
 Released under the repo's MIT license; part of ``tests/release``.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -94,7 +95,9 @@ def ref_digest(ref: str) -> str | None:
     return digest
 
 
-def digest_relationship(ref: str, image_id: str, repo_digests: str | Iterable[str] | None) -> bool:
+def digest_relationship(
+    ref: str, image_id: str, repo_digests: str | Iterable[str] | None
+) -> bool:
     """True when the pinned digest ref describes the inspected image record.
 
     The digest either equals the resolved image id or appears among the
@@ -113,7 +116,9 @@ def digest_relationship(ref: str, image_id: str, repo_digests: str | Iterable[st
             inner = inner[1:-1]
         entries = [entry.strip() for entry in inner.split() if entry.strip()]
     else:
-        entries = [str(entry).strip() for entry in (repo_digests or []) if str(entry).strip()]
+        entries = [
+            str(entry).strip() for entry in (repo_digests or []) if str(entry).strip()
+        ]
     return any(entry.rpartition("@")[2] == digest for entry in entries)
 
 
@@ -124,28 +129,39 @@ def validate_release_inputs(env: Mapping[str, str]) -> ReleaseInputs:
     Raises :class:`ReleaseContractError` with the full wiring contract on any
     violation. Never calls Docker.
     """
-    missing = [v for v in (CANDIDATE_VAR, PREVIOUS_VAR, ARCH_VAR) if not (env.get(v) or "").strip()]
+    missing = [
+        v
+        for v in (CANDIDATE_VAR, PREVIOUS_VAR, ARCH_VAR)
+        if not (env.get(v) or "").strip()
+    ]
     if missing:
         raise ReleaseContractError(
             f"missing required input env vars {sorted(missing)}; {CONTRACT_TEXT}"
         )
     candidate, previous, arch = (
-        (env[CANDIDATE_VAR].strip(), env[PREVIOUS_VAR].strip(), env[ARCH_VAR].strip())
+        env[CANDIDATE_VAR].strip(),
+        env[PREVIOUS_VAR].strip(),
+        env[ARCH_VAR].strip(),
     )
     bad_refs = [v for v in (candidate, previous) if re.search(r"\s", v)]
     if bad_refs:
         raise ReleaseContractError(
             f"image refs must be whitespace-free (docker argv safety, got {bad_refs!r}); {CONTRACT_TEXT}"
         )
-    unpinned = [var for var, ref in ((CANDIDATE_VAR, candidate), (PREVIOUS_VAR, previous))
-                if ref_digest(ref) is None]
+    unpinned = [
+        var
+        for var, ref in ((CANDIDATE_VAR, candidate), (PREVIOUS_VAR, previous))
+        if ref_digest(ref) is None
+    ]
     if unpinned:
         raise ReleaseContractError(
             f"{unpinned} must be digest-pinned as name@sha256:<64 lowercase hex>; mutable "
             f"tags (:latest, :<version>) are not immutable release references; {CONTRACT_TEXT}"
         )
     if arch not in ARCHES:
-        raise ReleaseContractError(f"{ARCH_VAR}={arch!r} is not in {list(ARCHES)}; {CONTRACT_TEXT}")
+        raise ReleaseContractError(
+            f"{ARCH_VAR}={arch!r} is not in {list(ARCHES)}; {CONTRACT_TEXT}"
+        )
 
     # Explicit hosted GitHub mode: the verified hosted case needs BOTH markers
     # with their exact values. Anything else is a non-hosted (or invalid)
@@ -164,9 +180,11 @@ def validate_release_inputs(env: Mapping[str, str]) -> ReleaseInputs:
         if not hosted:
             detail = ""
             if gh_actions or runner_env:
-                detail = (f" (got {GITHUB_ACTIONS_VAR}={gh_actions!r}, "
-                          f"{RUNNER_ENVIRONMENT_VAR}={runner_env!r}; verified hosted requires "
-                          f"exactly {HOSTED_ACTIONS_VALUE!r}/{HOSTED_RUNNER_VALUE!r})")
+                detail = (
+                    f" (got {GITHUB_ACTIONS_VAR}={gh_actions!r}, "
+                    f"{RUNNER_ENVIRONMENT_VAR}={runner_env!r}; verified hosted requires "
+                    f"exactly {HOSTED_ACTIONS_VALUE!r}/{HOSTED_RUNNER_VALUE!r})"
+                )
             raise ReleaseContractError(
                 "the host/default docker socket is only permitted in the verified hosted "
                 f"GitHub case ({GITHUB_ACTIONS_VAR}={HOSTED_ACTIONS_VALUE} AND "
@@ -179,8 +197,13 @@ def validate_release_inputs(env: Mapping[str, str]) -> ReleaseInputs:
                 f"TLS wiring (DOCKER_TLS_VERIFY={tls_verify!r}, DOCKER_CERT_PATH={cert_path!r}); "
                 f"use it plainly in the hosted case or wire the DinD trio; {CONTRACT_TEXT}"
             )
-        return ReleaseInputs(candidate_image=candidate, previous_image=previous, arch=arch,
-                             hosted=hosted, socket_mode=SOCKET_HOST_DEFAULT)
+        return ReleaseInputs(
+            candidate_image=candidate,
+            previous_image=previous,
+            arch=arch,
+            hosted=hosted,
+            socket_mode=SOCKET_HOST_DEFAULT,
+        )
     if docker_host != DIND_ENDPOINT:
         raise ReleaseContractError(
             f"DOCKER_HOST={docker_host!r} is neither the verified DinD endpoint "
@@ -197,11 +220,18 @@ def validate_release_inputs(env: Mapping[str, str]) -> ReleaseInputs:
         raise ReleaseContractError(
             f"DinD endpoint contract violated (got {violated}); required: {REQUIRED_TLS_ENV}; {CONTRACT_TEXT}"
         )
-    return ReleaseInputs(candidate_image=candidate, previous_image=previous, arch=arch,
-                         hosted=hosted, socket_mode=SOCKET_DIND_TLS)
+    return ReleaseInputs(
+        candidate_image=candidate,
+        previous_image=previous,
+        arch=arch,
+        hosted=hosted,
+        socket_mode=SOCKET_DIND_TLS,
+    )
 
 
-def classify_release(previous_ref: str, previous_id: str, candidate_ref: str, candidate_id: str) -> str:
+def classify_release(
+    previous_ref: str, previous_id: str, candidate_ref: str, candidate_id: str
+) -> str:
     """Classify the qualification run.
 
     Returns ``"same-image-smoke"`` when the two immutable inputs resolve to the
@@ -262,13 +292,25 @@ def redact(text: str, *values: str) -> str:
 # so a lexical hit for a term can only come from content, never slug lookup.
 HEREDOC_TAG = "AIO_REL_EOF"
 GIT_PAGES = (
-    {"slug": "notes/persistence-matrix", "path": "notes/persistence-matrix.md",
-     "title": "Persistence matrix", "term": "glowworm"},
-    {"slug": "notes/replay-ledger", "path": "notes/replay-ledger.md",
-     "title": "Replay ledger", "term": "kelpstone"},
+    {
+        "slug": "notes/persistence-matrix",
+        "path": "notes/persistence-matrix.md",
+        "title": "Persistence matrix",
+        "term": "glowworm",
+    },
+    {
+        "slug": "notes/replay-ledger",
+        "path": "notes/replay-ledger.md",
+        "title": "Replay ledger",
+        "term": "kelpstone",
+    },
 )
-PUT_WITNESS_SPEC = {"slug": "notes/put-witness", "path": "notes/put-witness.md",
-                    "title": "Put witness", "term": "quahog"}
+PUT_WITNESS_SPEC = {
+    "slug": "notes/put-witness",
+    "path": "notes/put-witness.md",
+    "title": "Put witness",
+    "term": "quahog",
+}
 ABSENT_TERM = "umbrafax"
 AFTER_UPGRADE_SLUG = "notes/after-upgrade"
 
@@ -302,19 +344,37 @@ def build_fixture(token: str) -> dict:
     pages = []
     for spec in specs:
         text = page_text(spec["term"], spec["title"], token)
-        assert HEREDOC_TAG not in text
-        pages.append({**spec, "text": text, "sha256": hashlib.sha256(text.encode()).hexdigest()})
+        if not (HEREDOC_TAG not in text):
+            raise AssertionError("Release invariant failed: HEREDOC_TAG not in text")
+        pages.append(
+            {**spec, "text": text, "sha256": hashlib.sha256(text.encode()).hexdigest()}
+        )
     terms = [p["term"] for p in pages]
-    assert len(set(terms)) == len(terms), f"query terms must be pairwise distinct: {terms}"
+    if not (len(set(terms)) == len(terms)):
+        raise AssertionError(f"query terms must be pairwise distinct: {terms}")
     for page in pages:
-        assert page["term"] not in page["slug"] and page["term"] not in page["title"], page
+        if not (page["term"] not in page["slug"] and page["term"] not in page["title"]):
+            raise AssertionError(page)
         for other in pages:
             if other is not page:
-                assert page["term"] not in other["slug"] and page["term"] not in other["title"], page
-    assert ABSENT_TERM not in terms and ABSENT_TERM not in token
-    assert token and token.strip() == token and not re.search(r"\s", token)
+                if not (
+                    page["term"] not in other["slug"]
+                    and page["term"] not in other["title"]
+                ):
+                    raise AssertionError(page)
+    if not (ABSENT_TERM not in terms and ABSENT_TERM not in token):
+        raise AssertionError(
+            "Release invariant failed: ABSENT_TERM not in terms and ABSENT_TERM not in token"
+        )
+    if not (token and token.strip() == token and (not re.search("\\s", token))):
+        raise AssertionError(
+            "Release invariant failed: token and token.strip() == token and (not re.search('\\\\s', token))"
+        )
     for page in pages:
-        assert ABSENT_TERM not in page["slug"] + page["title"] + page["text"]
+        if not (ABSENT_TERM not in page["slug"] + page["title"] + page["text"]):
+            raise AssertionError(
+                "Release invariant failed: ABSENT_TERM not in page['slug'] + page['title'] + page['text']"
+            )
     expected_hits = {p["term"]: [p["slug"]] for p in pages}
     git_pages = [p for p in pages if p["seeded_by"] == "git"]
     return {

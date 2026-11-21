@@ -7,6 +7,7 @@ titles share no vocabulary with the queries - so a hit proves content
 retrieval, not slug lookup. Searches run on the previous image, on the
 candidate after the upgrade, and after the restart; the receipts carry them.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -18,19 +19,23 @@ pytestmark = pytest.mark.integration
 
 def _phase_searches(release_run: dict, phase: str) -> dict:
     searches = release_run["searches"][phase]
-    assert searches, f"no search receipts recorded for {phase}"
+    assert searches, f"no search receipts recorded for {phase}"  # nosec B101
     return searches
 
 
 def _assert_hit(searches: dict, term: str, slug: str) -> None:
     receipt = searches[term]
-    assert receipt["exit"] == 0, f"search failed for {term!r}: {receipt}"
-    assert slug in receipt["stdout"], f"lexical search for body term {term!r} missed {slug}: {receipt}"
+    assert receipt["exit"] == 0, f"search failed for {term!r}: {receipt}"  # nosec B101
+    assert (
+        slug in receipt["stdout"]
+    ), f"lexical search for body term {term!r} missed {slug}: {receipt}"  # nosec B101
 
 
 def _assert_miss(searches: dict, term: str, slug: str) -> None:
     receipt = searches[term]
-    assert slug not in receipt["stdout"], f"{term!r} wrongly surfaced {slug}: {receipt['stdout'][:600]}"
+    assert (
+        slug not in receipt["stdout"]
+    ), f"{term!r} wrongly surfaced {slug}: {receipt['stdout'][:600]}"  # nosec B101
 
 
 def test_content_terms_find_their_pages_on_the_candidate(release_run) -> None:
@@ -49,7 +54,9 @@ def test_retrieval_is_body_content_not_slug_lookup(release_run) -> None:
     fixture = build_fixture(receipt_fixture["run_token"])
     searches = _phase_searches(release_run, "after")
     for page in fixture["pages"]:
-        assert page["term"] not in page["slug"] and page["term"] not in page["title"]
+        assert (
+            page["term"] not in page["slug"] and page["term"] not in page["title"]
+        )  # nosec B101
         for other in fixture["pages"]:
             if other is not page:
                 _assert_miss(searches, page["term"], other["slug"])
@@ -60,9 +67,13 @@ def test_unknown_term_returns_no_fixture_pages(release_run) -> None:
     for phase in ("before", "after", "restart"):
         searches = _phase_searches(release_run, phase)
         receipt = searches[absent]
-        assert receipt["exit"] == 0, f"{absent} search failed at {phase}: {receipt}"
+        assert (
+            receipt["exit"] == 0
+        ), f"{absent} search failed at {phase}: {receipt}"  # nosec B101
         for slug in release_run["fixture"]["sha_by_slug"]:
-            assert slug not in receipt["stdout"], f"{absent} surfaced {slug} at {phase}"
+            assert (
+                slug not in receipt["stdout"]
+            ), f"{absent} surfaced {slug} at {phase}"  # nosec B101
 
 
 def test_retrieval_parity_before_vs_after_upgrade(release_run) -> None:
@@ -73,6 +84,8 @@ def test_retrieval_parity_before_vs_after_upgrade(release_run) -> None:
     before = _phase_searches(release_run, "before")
     for phase in ("after", "restart"):
         searches = _phase_searches(release_run, phase)
-        for term, expected_slug in ((entry[0], entry[1][0]) for entry in fixture["expected_hits"].items()):
+        for term, expected_slug in (
+            (entry[0], entry[1][0]) for entry in fixture["expected_hits"].items()
+        ):
             _assert_hit(before, term, expected_slug)
             _assert_hit(searches, term, expected_slug)
