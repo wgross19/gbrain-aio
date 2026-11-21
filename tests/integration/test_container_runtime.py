@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from pathlib import Path
 
 import pytest
 
@@ -14,6 +15,7 @@ from tests.helpers import (
     docker_available,
     docker_volume,
 )
+from tests.release.fleet_gate import qualify, verify_release_daemon
 
 pytestmark = pytest.mark.integration
 
@@ -25,6 +27,15 @@ def runtime() -> DockerRuntime:
     runtime = DockerRuntime(IMAGE_TAG)
     runtime.build()
     return runtime
+
+
+@pytest.mark.timeout(2400)
+def test_release_upgrade_qualification(request: pytest.FixtureRequest, tmp_path: Path, capsys) -> None:
+    """Run on the existing fleet integration entrypoint, including pre-publish validation."""
+    verify_release_daemon()
+    request.getfixturevalue('runtime')
+    with capsys.disabled():
+        qualify(IMAGE_TAG, tmp_path)
 
 
 # --- 1. Image starts successfully -------------------------------------------
