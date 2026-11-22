@@ -2,7 +2,12 @@ ARG BUN_VERSION=1.4.4
 ARG BUN_DIGEST=sha256:1d22548f177f4ff38e0c15baa3c2c46c6c2060ba2d1bc573bb4720b407548f1d
 ARG BUN_IMAGE=oven/bun:${BUN_VERSION}
 ARG CADDY_VERSION=2.10.2
-ARG CADDY_DIGEST=sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83
+# Multi-arch index (linux/amd64 + linux/arm64/v8 + armv6/v7, ppc64le, riscv64,
+# s390x). linux/amd64 resolves to the previously pinned single-arch digest
+# d8c17a86..., so amd64 bytes are unchanged; arm64 builds select the native
+# 8dbca352... child instead of reusing amd64 under qemu. Registry evidence:
+# docs/base-images/base-image-pins.json (guarded by tests/test_base_image_pins.py).
+ARG CADDY_DIGEST=sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
 ARG CADDY_IMAGE=caddy:${CADDY_VERSION}-alpine
 # Multi-arch index (amd64+arm64v8): the old single-arch amd64 digest broke the
 # arm64 build under qemu (bun arm64 binary vs amd64 debian userspace).
