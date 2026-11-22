@@ -55,7 +55,7 @@ build after this change.
 
 ## Local verification (no Docker)
 
-```
+```console
 $ python -m pytest -q tests/test_base_image_pins.py
 7 passed in 0.03s
 
