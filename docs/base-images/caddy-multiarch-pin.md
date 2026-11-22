@@ -21,15 +21,15 @@ Captured with anonymous Docker Hub `/v2/` manifest GETs; every child manifest
 body was re-hashed and compared to its digest (`digest_matches_body: true` for
 all entries, including attestations).
 
-| Ref | Value |
-| --- | --- |
-| Tag | `caddy:2.10.2-alpine` |
-| Index digest (`Docker-Content-Digest`) | `sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d` |
-| Index media type | `application/vnd.oci.image.index.v1+json` |
-| linux/amd64 child | `sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83` (== the previous pin) |
-| linux/arm64/v8 child | `sha256:8dbca3525dd8dce671e495665a0eb297a83ec87ee30f373947d0ea93115949db` |
-| Other linux children | arm/v6 `9ecaeae5…`, arm/v7 `333ca049…`, ppc64le `a46a0437…`, riscv64 `5f7460b2…`, s390x `19c92446…` |
-| Attestations | 7 `attestation-manifest` entries, platform `unknown/unknown` — not selectable as a base |
+| Ref                                    | Value                                                                                               |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Tag                                    | `caddy:2.10.2-alpine`                                                                               |
+| Index digest (`Docker-Content-Digest`) | `sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d`                           |
+| Index media type                       | `application/vnd.oci.image.index.v1+json`                                                           |
+| linux/amd64 child                      | `sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83` (== the previous pin)     |
+| linux/arm64/v8 child                   | `sha256:8dbca3525dd8dce671e495665a0eb297a83ec87ee30f373947d0ea93115949db`                           |
+| Other linux children                   | arm/v6 `9ecaeae5…`, arm/v7 `333ca049…`, ppc64le `a46a0437…`, riscv64 `5f7460b2…`, s390x `19c92446…` |
+| Attestations                           | 7 `attestation-manifest` entries, platform `unknown/unknown` — not selectable as a base             |
 
 Corroborating tags (same publish, so the index is not an orphan):
 
@@ -44,11 +44,11 @@ native child instead of reusing amd64.
 
 ## Other pinned stages (already native-multiarch)
 
-| Stage | Pin (in Dockerfile) | Kind | amd64 child | arm64 child |
-| --- | --- | --- | --- | --- |
-| `bun` | `oven/bun:1.4.4@sha256:1d22548f…` | OCI index | `3f23864d…` | `f2b798e7…` (arm64) |
-| debian base | `debian:bookworm-slim@sha256:88200866…` | OCI index (pinned index predates the moved tag, which is now `734a72b3…`) | `5ae3c39e…` | `6bd27d44…` (arm64/v8) |
-| s6-overlay | tarball `3.2.1.0`, arch from `dpkg --print-architecture` | `amd64 -> x86_64`, `arm64 -> aarch64` | n/a | n/a |
+| Stage       | Pin (in Dockerfile)                                      | Kind                                                                      | amd64 child | arm64 child            |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------------------------------- | ----------- | ---------------------- |
+| `bun`       | `oven/bun:1.4.4@sha256:1d22548f…`                        | OCI index                                                                 | `3f23864d…` | `f2b798e7…` (arm64)    |
+| debian base | `debian:bookworm-slim@sha256:88200866…`                  | OCI index (pinned index predates the moved tag, which is now `734a72b3…`) | `5ae3c39e…` | `6bd27d44…` (arm64/v8) |
+| s6-overlay  | tarball `3.2.1.0`, arch from `dpkg --print-architecture` | `amd64 -> x86_64`, `arm64 -> aarch64`                                     | n/a         | n/a                    |
 
 No stage remains amd64-only, so the Dockerfile is consistent for a native arm64
 build after this change.

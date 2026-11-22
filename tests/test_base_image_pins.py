@@ -81,7 +81,9 @@ def test_caddy_amd64_child_is_byte_identical_to_the_previous_pin() -> None:
     amd64 = _linux_children(caddy["index"])["linux/amd64"]
     assert amd64["digest"] == LEGACY_CADDY_AMD64  # nosec B101
     assert amd64["manifest_body_sha256"] == LEGACY_CADDY_AMD64  # nosec B101
-    assert amd64["media_type"] == "application/vnd.oci.image.manifest.v1+json"  # nosec B101
+    assert (
+        amd64["media_type"] == "application/vnd.oci.image.manifest.v1+json"
+    )  # nosec B101
 
 
 def test_caddy_index_selects_a_native_arm64_child() -> None:
@@ -105,7 +107,10 @@ def test_no_attestation_manifest_is_selectable_as_a_platform() -> None:
     for child in caddy["index"]["manifests"]:
         if child["platform"].get("os") == "unknown":
             assert child.get("reference_type") == "attestation-manifest"  # nosec B101
-    assert set(caddy["selected_platforms"]) == {"linux/amd64", "linux/arm64/v8"}  # nosec B101
+    assert set(caddy["selected_platforms"]) == {
+        "linux/amd64",
+        "linux/arm64/v8",
+    }  # nosec B101
 
 
 def test_other_base_stages_are_pinned_to_multiarch_indexes() -> None:
@@ -113,7 +118,9 @@ def test_other_base_stages_are_pinned_to_multiarch_indexes() -> None:
     args = _args()
     pins = _receipt()["other_base_pins"]
     assert args["BUN_DIGEST"] == pins["oven/bun"]["reference"]  # nosec B101
-    assert args["DEBIAN_IMAGE"].rsplit("@", 1)[1] == pins["library/debian"]["reference"]  # nosec B101
+    assert (
+        args["DEBIAN_IMAGE"].rsplit("@", 1)[1] == pins["library/debian"]["reference"]
+    )  # nosec B101
     for repo in ("oven/bun", "library/debian"):
         index = pins[repo]
         assert index["is_index"] is True  # nosec B101
