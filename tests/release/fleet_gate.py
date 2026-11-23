@@ -19,7 +19,10 @@ from defusedxml import ElementTree as ET
 from tests.release.release_contract import validate_release_inputs
 from tests.release.release_ops import d, verify_dind_session
 
-PREVIOUS = "dub19/gbrain-aio@sha256:1e95618ebb6216513121a90b84a1b9a88752ef46e4cbfb663d4acf6f14659240"
+# Published v0.60.764.0-aio.1. Its arm64 child has a native Caddy binary.
+# The prior pin, v0.60.607.0-aio.1, kept an amd64 Caddy file and never
+# answered HTTPS on a native arm64 runner.
+PREVIOUS = "dub19/gbrain-aio@sha256:11e652320b22305037588a1f0f2afbf2dce72c231e399e89bdee4450271a381a"
 REGISTRY = (
     "registry@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373"
 )
