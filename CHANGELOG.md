@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.60.764.0-aio.1 - 2026-11-23
+
+### Fixes
+
+- Select the native Caddy image on ARM64 (#114)
+
+### Maintenance
+
+- Gitignore .hermes and .worktrees
+
+- Bump gbrain to v0.60.615.0 (#99)
+
+- Bump gbrain to v0.60.626.0 (#100)
+
+- Bump gbrain to v0.60.712.0 (#104)
+
+- Bump gbrain to v0.60.721.0 (#105)
+
+- Bump gbrain to v0.60.725.0 (#106)
+
+- Bump gbrain to v0.60.733.0 (#107)
+
+- Bump gbrain to v0.60.737.0 (#108)
+
+- Bump gbrain to v0.60.740.0 (#109)
+
+- Bump gbrain to v0.60.747.0 (#110)
+
+- Bump gbrain to v0.60.756.0 (#111)
+
+- Bump gbrain to v0.60.764.0 (#115)
+
+### Tests
+
+- Qualify GBrain upgrade writes in fleet integration checks (#112)
+
+- Adopt the fleet-wide required unit suite (#113)
+
 ## v0.60.607.0-aio.1 - 2026-11-08
 
 ### Features
