@@ -499,7 +499,12 @@ def put_page(
         error = (
             CheckoutRecoveryRequired
             if re.search(
-                r"^Error \[recovery_required\]: The physical checkout identity changed or belongs to another owner\.",
+                # Match the stable `Error [recovery_required]:` code prefix, not a
+                # specific message: upstream rewords the message text between
+                # releases (garrytan/gbrain #10260 reworded the missing-reservation
+                # guard). probe_reservation verifies fail-closed behavior itself
+                # (no file, no page rows), so the class-level match is safe.
+                r"^Error \[recovery_required\]:",
                 put.stderr,
                 re.MULTILINE,
             )
